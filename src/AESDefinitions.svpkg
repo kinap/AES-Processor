@@ -1,0 +1,9 @@
+`ifndef AES_DEFINITIONS
+  `define AES_DEFINITIONS
+
+  // Set key size based on define
+
+  // Byte-oriented AES "State"
+  typedef logic [0:15][7:0] state_t;
+
+`endif

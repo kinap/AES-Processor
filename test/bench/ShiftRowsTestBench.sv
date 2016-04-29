@@ -2,6 +2,8 @@
 // Testbench for ShiftRows stage of AES round
 //
 
+include ../../src/AESDefinitions.svpkg;
+
 module ShiftRowsTestBench();
 
 // Input and Output connections
@@ -9,8 +11,8 @@ logic [127:0] in, out;
 
 // Test storage structures
 typedef struct {
-  bit [127:0] in;
-  bit [127:0] out;
+  state_t in;
+  state_t out;
 } test_t;
 
 test_t qTests[$];
@@ -19,8 +21,8 @@ test_t qTests[$];
 task automatic MakeTest(bit [127:0] in, bit [127:0] out);
 begin
   test_t newTest;
-  newTest.in = in;
-  newTest.out = out;
+  $cast(newTest.in, in);
+  $cast(newTest.out, out);
   qTests.push_back(newTest);
 end
 endtask
@@ -45,6 +47,7 @@ task ApplyTests();
       $display("***        Input:    %h", curTest.in);
       $display("***        Output:   %h", curOut);
       $display("***        Expected: %h", curTest.out);
+      $finish();
     end 
   end
 endtask
@@ -55,7 +58,7 @@ string phaseString, tempString;
 
 initial
 begin
-  testFile = $fopen("temp.txt", "r");
+  testFile = $fopen("test/vectors/fips_example_vectors.txt", "r");
   while(!$feof(testFile))
   begin
     i = $fscanf(testFile, "%s %h\n", phaseString, parse1);

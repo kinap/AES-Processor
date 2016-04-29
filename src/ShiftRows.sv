@@ -2,19 +2,13 @@
 // ShiftRows Layer of the AES round
 //
 
-module ShiftRows(input logic [127:0] inBytes, 
-                 output logic [127:0] outBytes);
-logic [0:3][0:3][7:0] state, outState;
+include AESDefinitions.svpkg;
 
+module ShiftRows(input state_t in, 
+                 output state_t out);
 always_comb
   begin
-    state = inBytes;
-
-    outState[0] = state[0];
-    outState[1] = { state[1][1:3], state[1][0] };
-    outState[2] = { state[2][2:3], state[2][0:1] };
-    outState[3] = { state[3][3], state[3][0:2] };
-
-    outBytes = outState;
+    out = { in[0], in[5], in[10], in[15], in[4], in[9], in[14], in[3],
+            in[8], in[13], in[2], in[7], in[12], in[1], in[6], in[11] };
   end
 endmodule
