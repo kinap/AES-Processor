@@ -23,29 +23,33 @@
       return qTest.pop_front();
     endfunction : GetNextTest
 
+    function int NumTests();
+      return qTest.size();
+    endfunction : NumTests
+
     function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
-      if(out !== (encryptedIn : curTest.encrypted ? curTest.plain));
+      if(out !== (encryptedIn ? curTest.encrypted : curTest.plain))
       begin
         $display("*** Error: Current output doesn't match expected");
-        $display("***        Input:    %h", (encryptedIn : curTest.encrypted ? curTest.plain);
+        $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
         $display("***        Output:   $h", out);
-        $display("***        Expected: %h", (encryptedIn : curTest.plain ? curTest.encrypted);
+        $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
         $finish();
       end
     endfunction : Compare
 
-    function void ParseFileForTestCases(int testFile, string parseString);
+    function void ParseFileForTestCases(string testFile, string phaseString);
       bit [127:0] parse1, parse2;
-      string tempString;
+      string parseString, tempString;
       int i, file;
       file = $fopen(testFile, "r");
       while(!$feof(testFile))
       begin
         i = $fscanf(testFile, "%s %h\n", parseString, parse1);
-        tempString = phaseString.substr(phaseString.len()-5, phaseString.len()-1;
-        if(tempString.icompare("s_box") == 0)
+        tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+        if(tempString.icompare(phaseString) == 0)
         begin
-          i = $fscanf(testFile, "%s %h\n", phaseString, parse2);
+          i = $fscanf(testFile, "%s %h\n", parseString, parse2);
           AddTestCase(.plain(parse1), .encrypted(parse2));
         end
       end 
