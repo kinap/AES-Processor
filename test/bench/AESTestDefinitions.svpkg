@@ -1,0 +1,60 @@
+`ifndef AES_TEST_DEFINITIONS
+  `define AES_TEST_DEFINITIONS
+
+  include ../../src/AESDefinitions.svpkg;
+
+  // Test storage structure
+  typedef struct {
+    state_t plain;
+    state_t encrypted;
+  } test_t;  
+
+  class UnitTester;
+    test_t qTests[$];
+
+    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted);
+      test_t newTest;
+      $cast(newTest.plain, plain);
+      $cast(newTest.encrypted, encrypted);
+      qTests.push_back(newTest);
+    endfunction : AddTestCase
+
+    function test_t GetNextTest();
+      return qTest.pop_front();
+    endfunction : GetNextTest
+
+    function int NumTests();
+      return qTest.size();
+    endfunction : NumTests
+
+    function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
+      if(out !== (encryptedIn ? curTest.encrypted : curTest.plain))
+      begin
+        $display("*** Error: Current output doesn't match expected");
+        $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
+        $display("***        Output:   $h", out);
+        $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
+        $finish();
+      end
+    endfunction : Compare
+
+    function void ParseFileForTestCases(string testFile, string phaseString);
+      bit [127:0] parse1, parse2;
+      string parseString, tempString;
+      int i, file;
+      file = $fopen(testFile, "r");
+      while(!$feof(testFile))
+      begin
+        i = $fscanf(testFile, "%s %h\n", parseString, parse1);
+        tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+        if(tempString.icompare(phaseString) == 0)
+        begin
+          i = $fscanf(testFile, "%s %h\n", parseString, parse2);
+          AddTestCase(.plain(parse1), .encrypted(parse2));
+        end
+      end 
+    endfunction : ParseFileForTestCases
+
+  endclass : UnitTester
+
+`endif
