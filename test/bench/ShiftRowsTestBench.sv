@@ -14,15 +14,15 @@ logic [127:0] in, inInv, out, outInv;
 ShiftRows Dut(in, out);
 ShiftRowsInverse Dut2(inInv, outInv);
 
+// Test execution and verification task
+test_t curTest;
+bit [127:0] curOut, curOutInv;
+
 initial
 begin
   UnitTester tester;
   tester = new();
   tester.ParseFileForTestCases("test/vectors/fips_example_vectors.txt", "s_box");
-
-  // Test execution and verification task
-  test_t curTest;
-  bit [127:0] curOut, curOutInv;
 
   while(NumTests() != 0)
   begin
@@ -32,8 +32,8 @@ begin
     #1 repeat(1);
     curOut = out;
     curOutInv = outInv;
-    Compare(in, curOut, curTest, 0);
-    Compare(inInv, curOutInv, curTest, 1);
+    tester.Compare(in, curOut, curTest, 0);
+    tester.Compare(inInv, curOutInv, curTest, 1);
   end
 end
 
