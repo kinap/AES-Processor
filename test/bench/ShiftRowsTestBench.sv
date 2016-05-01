@@ -22,7 +22,7 @@ initial
 begin
   UnitTester tester;
   tester = new();
-  tester.ParseFileForTestCases("test/vectors/fips_example_vectors.txt", "s_box");
+  tester.ParseFileForTestCases("test/vectors/fips_example_vectors.txt", "s_row");
 
   while(tester.NumTests() != 0)
   begin

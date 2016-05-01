@@ -49,13 +49,12 @@
       file = $fopen(testFile, "r");
       while(!$feof(file))
       begin
-        i = $fscanf(file, "%s %h\n", parseString, parse1);
+        i = $fscanf(file, "%s %h\n", parseString, parse2);
         tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
         if(tempString.icompare(phaseString) == 0)
-        begin
-          i = $fscanf(file, "%s %h\n", parseString, parse2);
           AddTestCase(.plain(parse1), .encrypted(parse2));
-        end
+        else
+          parse1 = parse2;
       end 
     endfunction : ParseFileForTestCases
 
