@@ -24,7 +24,7 @@ begin
   tester = new();
   tester.ParseFileForTestCases("test/vectors/fips_example_vectors.txt", "s_box");
 
-  while(NumTests() != 0)
+  while(tester.NumTests() != 0)
   begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
@@ -35,6 +35,8 @@ begin
     tester.Compare(in, curOut, curTest, 0);
     tester.Compare(inInv, curOutInv, curTest, 1);
   end
+
+  $finish();
 end
 
 endmodule
