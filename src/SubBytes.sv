@@ -2,7 +2,7 @@
 // SubBytes Layer of the AES round
 //
 
-include AESDefinitions.svpkg;
+`include "AESDefinitions.svpkg"
 
 module SubBytes(input state_t in,
                 output state_t out);

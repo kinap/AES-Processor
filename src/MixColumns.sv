@@ -5,8 +5,7 @@
 //
 // FIXME - Dan - I feel like part of this isn't synthesizable?
 
-include AESDefinitions.svpkg;
-import GaloisFieldFunctions::*;
+`include "AESDefinitions.svpkg"
 
 //
 // Matrix used to perform matrix multiplication in GF(2^8):

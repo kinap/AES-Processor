@@ -2,7 +2,7 @@
   `define AES_DEFINITIONS
 
   // FIXME - Dan - should this be a package?
-
+  package AESDefinitions;
   // Set key size based on define
   `ifdef AES_256
     `define KEY_SIZE 256
@@ -18,6 +18,9 @@
   // Byte-oriented AES "State"
   typedef logic [0:15][7:0] state_t;
 
+  endpackage : AESDefinitions
+
+  import AESDefinitions::*;
 
 //
 // Selected byte-oriented arithmetic operations in GF(2^8).
@@ -163,6 +166,8 @@ function automatic byte_t GfMultBy14(input byte_t a);
   return GfMultLut14[a];
 endfunction
 
-endpackage
+endpackage : GaloisFieldFunctions
+
+import GaloisFieldFunctions::*;
 
 `endif

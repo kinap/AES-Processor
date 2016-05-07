@@ -2,12 +2,12 @@
 // AES Round & InverseRound
 //
 
-include AESDefinitions.svpkg;
+`include "AESDefinitions.svpkg"
 
-module Round(input state_t in, roundKey_t key
+module Round(input state_t in, roundKey_t key,
              output state_t out);
 parameter Round = 1;
-loclparam finalRound = (Round == NUM_ROUNDS) ? 1 : 0;
+localparam finalRound = ((Round == `NUM_ROUNDS) ? 1 : 0);
 
 // State wire array
 state_t wires[3];
@@ -25,10 +25,10 @@ AddRoundKey ark(wires[2], key, out);
 
 endmodule : Round
 
-module InverseRound(input state_t in, roundKey_t key
+module InverseRound(input state_t in, roundKey_t key,
                     output state_t out);
 parameter Round = 1;
-localparam finalRound = (ROUND == NUM_ROUNDS) ? 1 : 0;
+localparam finalRound = (Round == `NUM_ROUNDS) ? 1 : 0;
 
 // State wire array
 state_t wires[3];
