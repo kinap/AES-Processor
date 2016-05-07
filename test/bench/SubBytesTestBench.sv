@@ -2,7 +2,8 @@
 // Testbench for SubBytes & Inverse SubBytes stage of AES round
 //
 
-include ../../src/AESDefinitions.svpkg;
+//include ../../src/AESDefinitions.svpkg;
+import AESDefinitions::*;
 include ./AESTestDefinitions.svpkg;
 
 module SubBytesTestBench();

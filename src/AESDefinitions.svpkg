@@ -15,8 +15,16 @@
     `define NUM_ROUNDS 10
   `endif
 
+  //
+  // Types and sizes for AES
+  //
+
+  parameter AES_STATE_SIZE = 16;
+
   // Byte-oriented AES "State"
-  typedef logic [0:15][7:0] state_t;
+  // Byte indices 0-3 are the first column, 4-7 are the second column, etc.
+  typedef logic [0:AES_STATE_SIZE-1][7:0] state_t;
+  typedef logic [7:0] byte_t;
 
   endpackage : AESDefinitions
 
@@ -27,10 +35,10 @@
 //
 package GaloisFieldFunctions;
 
-typedef logic [7:0] byte_t;
+import AESDefinitions::byte_t;
 
 // These LUTs take up 1.5K of memory, but it's faster and we don't have to worry about
-// implementing their complex functions.
+// implementing these complex functions.
 
 byte_t GfMultLut2[256] =
 '{8'h00,8'h02,8'h04,8'h06,8'h08,8'h0a,8'h0c,8'h0e,8'h10,8'h12,8'h14,8'h16,8'h18,8'h1a,8'h1c,8'h1e,
@@ -140,12 +148,11 @@ byte_t GfMultLut14[256] =
   8'h37,8'h39,8'h2b,8'h25,8'h0f,8'h01,8'h13,8'h1d,8'h47,8'h49,8'h5b,8'h55,8'h7f,8'h71,8'h63,8'h6d,
   8'hd7,8'hd9,8'hcb,8'hc5,8'hef,8'he1,8'hf3,8'hfd,8'ha7,8'ha9,8'hbb,8'hb5,8'h9f,8'h91,8'h83,8'h8d};
 
-// Multiply by 2 is a shift then XOR
+// Multiplication functions used in Rijndael
 function automatic byte_t GfMultBy2(input byte_t a);
   return GfMultLut2[a];
 endfunction
 
-// Multiply by 3 is multiply by 2 then XOR
 function automatic byte_t GfMultBy3(input byte_t a);
   return GfMultLut3[a];
 endfunction
@@ -170,4 +177,4 @@ endpackage : GaloisFieldFunctions
 
 import GaloisFieldFunctions::*;
 
-`endif
+`endif // AES_DEFINITIONS
