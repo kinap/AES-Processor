@@ -1,8 +1,7 @@
 `ifndef AES_TEST_DEFINITIONS
   `define AES_TEST_DEFINITIONS
 
-  //include ../../src/AESDefinitions.svpkg;
-  import AESDefinitions::*;
+  `include "../../src/AESDefinitions.svpkg"
 
   // Test storage structure
   typedef struct {
