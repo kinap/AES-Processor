@@ -6,10 +6,13 @@
   // Set key size based on define
   `ifdef AES_256
     `define KEY_SIZE 256
+    `define NUM_ROUNDS 14
   `elsif AES_192
     `define KEY_SIZE 192
+    `define NUM_ROUNDS 12
   `else
-    `define AES_128
+    `define KEY_SIZE 128
+    `define NUM_ROUNDS 10
   `endif
 
   // Byte-oriented AES "State"
