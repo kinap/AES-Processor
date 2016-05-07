@@ -1,5 +1,5 @@
 //
-// Testbench for SubBytes & Inverse SubBytes stage of AES round
+// Testbench for MixColumns & Inverse MixColumns stage of AES round
 //
 
 include ../../src/AESDefinitions.svpkg;
