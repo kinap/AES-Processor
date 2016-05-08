@@ -9,6 +9,12 @@
     state_t encrypted;
   } test_t;  
 
+  typedef struct {
+    state_t plain;
+    state_t encrypted;
+    roundKey_t roundKey;
+  } keyTest_t;
+
   class UnitTester;
     test_t qTests[$];
 
@@ -59,5 +65,61 @@
     endfunction : ParseFileForTestCases
 
   endclass : UnitTester
+
+  class UnitKeyTester;
+    keyTest_t qTests[$];
+
+    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted, [127:0] roundKey);
+      keyTest_t newTest;
+      $cast(newTest.plain, plain);
+      $cast(newTest.encrypted, encrypted);
+      $cast(newTest.roundKey, roundKey);
+      qTests.push_back(newTest);
+    endfunction : AddTestCase
+
+    function keyTest_t GetNextTest();
+      return qTests.pop_front();
+    endfunction : GetNextTest
+
+    function int NumTests();
+      return qTests.size();
+    endfunction : NumTests
+
+    function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
+      if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
+      begin
+        $display("*** Error: Current output doesn't match expected");
+        if(encryptedIn)
+          $display("***        Inverse Phase");
+        else
+          $display("***        Normal Phase");
+        $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
+        $display("***        Key:      %h", curTest.roundKey);
+        $display("***        Output:   %h", out);
+        $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
+        $finish();
+      end
+    endfunction : Compare
+
+    function void ParseFileForTestCases(string testFile, string phaseString);
+      bit [127:0] parse1, parse2, parse3;
+      string parseString, tempString;
+      int i, file;
+      file = $fopen(testFile, "r");
+      while(!$feof(file))
+      begin
+        i = $fscanf(file, "%s %h\n", parseString, parse2);
+        tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+        if(tempString.icompare(phaseString) == 0)
+        begin
+          i = $fscanf(file, "%s $h\n", parseString, parse3);
+          AddTestCase(.plain(parse1), .roundKey(parse2), .encrypted(parse3));
+        end
+        else
+          parse1 = parse2;
+      end 
+    endfunction : ParseFileForTestCases
+
+  endclass : UnitKeyTester
 
 `endif
