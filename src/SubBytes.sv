@@ -4,6 +4,7 @@
 
 `include "AESDefinitions.svpkg"
 
+// TODO: Parameterize the substitution width for this module
 module SubBytes(input state_t in,
                 output state_t out);
 

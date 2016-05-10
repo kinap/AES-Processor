@@ -31,6 +31,8 @@
 
   endpackage : AESDefinitions
 
+// TODO: we should get rid of all imports in this file, except what's absolutely necessary for
+// a package to work - we're polluting the global namespace and defeating the purpose of packages
   import AESDefinitions::*;
 
 //
