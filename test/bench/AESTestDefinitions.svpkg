@@ -15,6 +15,7 @@
     roundKey_t roundKey;
   } keyTest_t;
 
+  //***************************************************************************************//
   class UnitTester;
     test_t qTests[$];
 
@@ -66,6 +67,7 @@
 
   endclass : UnitTester
 
+  //***************************************************************************************//
   class UnitKeyTester;
     keyTest_t qTests[$];
 
