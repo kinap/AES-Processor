@@ -24,12 +24,12 @@
 
   // Byte-oriented AES "State"
   // Byte indices 0-3 are the first column, 4-7 are the second column, etc.
-  typedef logic [0:AES_STATE_SIZE-1][7:0] state_t;
   typedef logic [7:0] byte_t;
+  typedef byte_t [0:AES_STATE_SIZE-1] state_t;
 
   // Byte-oriented AES "Key" and "Round Key"
-  typedef logic [0:KEY_BYTES-1][7:0] key_t;
-  typedef logic [0:AES_STATE_SIZE-1][7:0] roundKey_t;
+  typedef byte_t [0:KEY_BYTES-1] key_t;
+  typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
   typedef byte_t [KEY_NUM_COLS-1:0] keyColumn_t;
   typedef union packed {
     key_t                           key;
