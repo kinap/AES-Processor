@@ -124,4 +124,75 @@
 
   endclass : UnitKeyTester
 
+  //***************************************************************************************//
+  class RoundTester;
+    keyTest_t qTests[$];
+
+    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted, [127:0] roundKey);
+      keyTest_t newTest;
+      $cast(newTest.plain, plain);
+      $cast(newTest.encrypted, encrypted);
+      $cast(newTest.roundKey, roundKey);
+      qTests.push_back(newTest);
+    endfunction : AddTestCase
+
+    function keyTest_t GetNextTest();
+      return qTests.pop_front();
+    endfunction : GetNextTest
+
+    function int NumTests();
+      return qTests.size();
+    endfunction : NumTests
+
+    function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
+      if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
+      begin
+        $display("*** Error: Current output doesn't match expected");
+        if(encryptedIn)
+          $display("***        Inverse Phase");
+        else
+          $display("***        Normal Phase");
+        $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
+        $display("***        Key:      %h", curTest.roundKey);
+        $display("***        Output:   %h", out);
+        $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
+        $finish();
+      end
+    endfunction : Compare
+
+    function void ParseFileForTestCases(string testFile);
+      bit [127:0] parse1, plain, encrypt, key;
+      string parseString, tempString;
+      int i, file;
+      bit [127:0] inputs[$];
+      file = $fopen(testFile, "r");
+      while(!$feof(file))
+      begin
+        i = $fscanf(file, "%s %h\n", parseString, parse1);
+        tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+        if(tempString.icompare("start") == 0 || tempString.icompare("k_sch") == 0 || tempString.icompare("utput") == 0)
+        begin
+          inputs.push_back(parse1);
+          if(tempString.icompare("utput") == 0)
+          begin
+            //$display("%p", inputs);
+            /*while(inputs.size() != 1)
+            begin
+              $displayh("%p", inputs.pop_back());
+            end*/
+            while(inputs.size() != 2)
+            begin
+              encrypt = inputs.pop_back();
+              key = inputs.pop_back();
+              plain = inputs.pop_back();
+              AddTestCase(.plain(plain), .roundKey(key), .encrypted(encrypt));
+              inputs.push_back(plain);
+            end
+          end
+        end
+      end
+    endfunction : ParseFileForTestCases
+
+  endclass : RoundTester
+
 `endif
