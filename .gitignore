@@ -60,3 +60,12 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# SystemVerilog and Mentor Graphics files/paths
+transcript
+work/
+
+# Vim files
+*.swp
+*.swo
+*.vim

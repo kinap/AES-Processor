@@ -5,48 +5,49 @@
 // TODO: this module only supports 128-bit key - update to support larger keys
 `include "AESDefinitions.svpkg"
 
-module KeyExpansion(input key_t key, 
-                    output roundKey_t [0:`NUM_ROUNDS+1] keySchedule);
+module KeyExpansion(input byte_t round, expandedKey_t prevExpandedKey,
+                    output roundKey_t roundKey, expandedKey_t nextExpandedKey);
 
 localparam byte_t RCON[16] = '{
     8'h8d, 8'h01, 8'h02, 8'h04, 8'h08, 8'h10, 8'h20, 8'h40, 
     8'h80, 8'h1b, 8'h36, 8'h6c, 8'hd8, 8'hab, 8'h4d, 8'h9a
 };
 
-localparam KEYROUNDS = `NUM_ROUNDS + 1;
 
 always_comb
 begin
 
-    keySchedule[0] = key;
-    for (int i=1; i<=KEYROUNDS; ++i)
-        keySchedule[i] = CalcRoundKey(i, keySchedule[i-1]);
+    nextExpandedKey.columns[0] = genFirstColumn(
+        round, prevExpandedKey.columns[0], prevExpandedKey.columns[KEY_NUM_COLS-1]);
+
+    for (int i=1; i<=3; ++i)
+        nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
+
+    // this won't be so simple for AES192 and AES256
+    roundKey = nextExpandedKey;
 
 end
 
-function automatic byte_t [3:0][3:0] CalcRoundKey(input integer round, byte_t [3:0][3:0] prevRound);
+function automatic keyColumn_t genFirstColumn(input integer round, keyColumn_t prevFirst, prevLast);
 
-    byte_t [3:0][3:0] nextRound;
+    keyColumn_t out;
 
-    nextRound[0] = prevRound[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevRound[3])));
+    out = prevFirst ^ ApplyRcon(round, SubBytes_4(Rot(prevLast)));
 
-    for (int i=1; i<=3; ++i)
-        nextRound[i] = nextRound[i-1] ^ prevRound[i];
-
-    return nextRound;
+    return out;
 
 endfunction
 
-function automatic byte_t [3:0] ApplyRcon(input integer round, byte_t [3:0] in);
 
-    return in ^ {RCON[round], 8'h0, 8'h0, 8'h0};
+function automatic keyColumn_t ApplyRcon(input integer round, keyColumn_t in);
+
+    return in ^ (RCON[round] << (KEY_COL_SIZE-1));
 
 endfunction
 
-// TODO: parameterize the SubBytes module and use that instead of this function
-function automatic byte_t [3:0] SubBytes_4(input byte_t [3:0] in);
+function automatic keyColumn_t SubBytes_4(input keyColumn_t in);
 
-    byte_t [3:0] out;
+    keyColumn_t out;
 
     for(int i=0; i<=3; ++i)
     begin
@@ -57,9 +58,9 @@ function automatic byte_t [3:0] SubBytes_4(input byte_t [3:0] in);
 
 endfunction
 
-function automatic byte_t [3:0] Rot(input byte_t [3:0] in);
+function automatic keyColumn_t Rot(input keyColumn_t in);
 
-    return {in[2:0], in[3]};
+    return {in[KEY_COL_SIZE-2:0], in[KEY_COL_SIZE-1]};
 
 endfunction
 
