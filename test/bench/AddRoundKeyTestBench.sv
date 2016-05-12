@@ -7,14 +7,14 @@
 module AddRoundKeyTestBench();
 
 // Input and Output connections
-logic [127:0] in, inInv, out, outInv, key, outKey;
+logic [127:0] in, out, key;
 
 // Module declaration
-AddRoundKey Dut(in, out, outKey);
+AddRoundKey Dut(in, key, out);
 
 // Test exectuion and verfication task
 keyTest_t curTest;
-bit [127:0] curOut, curOutInv;
+bit [127:0] curOut;
 
 initial
 begin
@@ -26,11 +26,9 @@ begin
   begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
-    inInv = curTest.encrypted;
     key = curTest.roundKey;
     #1 repeat(1);
     curOut = out;
-    curOutInv = outInv;
     tester.Compare(in, curOut, curTest, 0);
   end
 

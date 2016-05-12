@@ -77,6 +77,12 @@
       $cast(newTest.encrypted, encrypted);
       $cast(newTest.roundKey, roundKey);
       qTests.push_back(newTest);
+      `ifdef DEBUG_TEST
+        $display("UnitKeyTester.AddTestCase");
+        $display("Plain: %h", plain);
+        $display("Encrypted: %h", encrypted);
+        $display("Round Key: %h", roundKey);
+      `endif
     endfunction : AddTestCase
 
     function keyTest_t GetNextTest();
@@ -114,7 +120,7 @@
         tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
         if(tempString.icompare(phaseString) == 0)
         begin
-          i = $fscanf(file, "%s $h\n", parseString, parse3);
+          i = $fscanf(file, "%s %h\n", parseString, parse3);
           AddTestCase(.plain(parse1), .roundKey(parse2), .encrypted(parse3));
         end
         else
