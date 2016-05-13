@@ -23,6 +23,11 @@ always_comb
         out[i+2] = in[i+0]            ^ in[i+1]            ^ GfMultBy2(in[i+2]) ^ GfMultBy3(in[i+3]);
         out[i+3] = GfMultBy3(in[i+0]) ^ in[i+1]            ^ in[i+2]            ^ GfMultBy2(in[i+3]);
       end
+  `ifdef DEBUG
+    $display("%m");
+    $display("In: %h", in);
+    $display("Out: %h", out);
+  `endif
   end
 endmodule
 
@@ -44,5 +49,10 @@ always_comb
         out[i+2] = GfMultBy13(in[i+0]) ^ GfMultBy9(in[i+1])  ^ GfMultBy14(in[i+2]) ^ GfMultBy11(in[i+3]);
         out[i+3] = GfMultBy11(in[i+0]) ^ GfMultBy13(in[i+1]) ^ GfMultBy9(in[i+2])  ^ GfMultBy14(in[i+3]);
       end
+  `ifdef DEBUG
+    $display("%m");
+    $display("In: %h", in);
+    $display("Out: %h", out);
+  `endif
   end
 endmodule
