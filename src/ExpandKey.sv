@@ -45,12 +45,12 @@ end
         nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
 
         for (int i=1; i<=3; ++i)
-            nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
+            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
-        nextExpandedKey.columns[4] = SubBytes_4(nextExpandedKey.columns[3]) ^ prevExpandedKey.columns[4];
+        nextBlock[4] = SubBytes_4(nextBlock[3]) ^ prevBlock[4];
 
         for (int i=5; i<=7; ++i)
-            nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
+            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
         return nextBlock;
 
