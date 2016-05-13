@@ -14,6 +14,11 @@ always_comb
     begin
       out[i] = sbox[in[i][7:4]][in[i][3:0]];
     end
+    `ifdef DEBUG
+      $display("%m");
+      $display("In: %h",in);
+      $display("Out: %h", out);
+    `endif
   end
 endmodule
 
@@ -24,7 +29,12 @@ always_comb
   begin
     for(int i = 0; i < 16; i++)
     begin
-      out[i] = invSbox[in[i][7:4]][in[i][3:0]]; //Placeholder until inverse SBOX is created.
+      out[i] = invSbox[in[i][7:4]][in[i][3:0]];
     end
+    `ifdef DEBUG
+      $display("%m");
+      $display("In: %h",in);
+      $display("Out: %h", out);
+    `endif
   end
 endmodule

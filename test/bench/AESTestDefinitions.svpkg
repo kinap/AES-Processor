@@ -181,12 +181,11 @@
           inputs.push_back(parse1);
           if(tempString.icompare("utput") == 0)
           begin
-            //$display("%p", inputs);
-            /*while(inputs.size() != 1)
-            begin
-              $displayh("%p", inputs.pop_back());
-            end*/
-            while(inputs.size() != 2)
+            // Drop the last round
+            // TODO: Figure out how to test the last round
+            inputs.pop_back();
+            inputs.pop_back();
+            while(inputs.size() > 2)
             begin
               encrypt = inputs.pop_back();
               key = inputs.pop_back();
@@ -194,6 +193,7 @@
               AddTestCase(.plain(plain), .roundKey(key), .encrypted(encrypt));
               inputs.push_back(plain);
             end
+            inputs = {};
           end
         end
       end
