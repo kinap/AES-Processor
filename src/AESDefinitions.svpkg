@@ -21,9 +21,11 @@
   // Types and sizes for AES
   //
   parameter AES_STATE_SIZE = 16;
+  parameter AES_STATE_NUM_COLS = AES_STATE_SIZE / 4;
   parameter KEY_BYTES = `KEY_SIZE / 8;
   parameter KEY_COL_SIZE = 4;
   parameter KEY_NUM_COLS = KEY_BYTES / KEY_COL_SIZE;
+  parameter EXP_KEY_PAD_COLS = ((KEY_NUM_COLS*`NUM_KEY_EXP_ROUNDS) - (AES_STATE_NUM_COLS*`NUM_ROUNDS));
 
   // Byte-oriented AES "State"
   // Byte indices 0-3 are the first column, 4-7 are the second column, etc.
@@ -35,8 +37,13 @@
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
   typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
   typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
+  typedef struct packed {
+    roundKey_t [0:`NUM_ROUNDS-1] keys;
+    expKeyColumn_t [0:EXP_KEY_PAD_COLS-1] padding;
+  } paddedRoundKeys_t;
+    
   typedef union packed {
-    roundKey_t [0:`NUM_ROUNDS-1] roundKeys;
+    paddedRoundKeys_t roundKeys;
     expKeyBlock_t [0:`NUM_KEY_EXP_ROUNDS-1] expBlocks;
   } expandedKey_t;
     
