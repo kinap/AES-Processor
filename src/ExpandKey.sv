@@ -2,50 +2,47 @@
 // Key Expansion Module
 //
 
-// TODO: The original plan for this module isn't going to work for 192- and 256-bit keys. 
-// 
-// There is not a 1:1 correspondence between the iteration used to generate the key schedule and the
-// rounds for Nk != 16. For example, in AES 192, each iteration of the key expansion algorithm
-// generates 192 bits, and it is repeated 8 times, creating a vectore that is 216 bytes wide (the
-// last 8 of which are truncated). The round keys are every 128-bit (16-byte) block within this
-// vector (leaving the last 8 bytes unused). 
-// 
-// Thus, each round key may actually require the results from two separate iterations of the key
-// expansion algorithm. We need to move this module outside of the round modules, let it generate
-// the whole key, and use exensive buffering to get the right round keys in the right places.
-
 `include "AESDefinitions.svpkg"
 
-module KeyExpansion(input byte_t round, expandedKey_t prevExpandedKey,
-                    output roundKey_t roundKey, expandedKey_t nextExpandedKey);
+module ExpandKey(input key_t key, output expandedKey_t expandedKey);
 
-localparam byte_t RCON[11] = '{
-    8'h8d, 8'h01, 8'h02, 8'h04, 8'h08, 8'h10, 
-    8'h20, 8'h40, 8'h80, 8'h1b, 8'h36, 
+localparam byte_t [KEY_COL_SIZE-1:0] RCON[11] = '{
+    'h8d, 'h01, 'h02, 'h04, 'h08, 'h10, 
+    'h20, 'h40, 'h80, 'h1b, 'h36
 };
-
 
 always_comb
 begin
 
-    nextExpandedKey.columns[0] = prevExpandedKey.columns[0] ^ ApplyRcon(
-                                    round, SubBytes_4(Rot(prevExpandedKey.columns[KEY_NUM_COLS-1])));
+    expandedKey.expBlocks[0] = key;
 
-    `ifndef AES_256 // Expanding a 128- or 192-bit key
+    for (int i=1; i<=`NUM_KEY_EXP_ROUNDS; ++i)
+        expandedKey.expBlocks[i] = expandBlock(i, expandedKey.expBlocks[i-1]);
+
+end
+
+`ifndef AES_256 // expanding a 128- or 192-bit key
+
+    function automatic expandBlock(input integer round, expKeyBlock_t prevBlock);
+
+        expKeyBlock_t nextBlock;
+
+        nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
+
         for (int i=1; i<=(KEY_NUM_COLS-1); ++i)
-            nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
+            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
-    `ifdef AES_192 // 192-bit key
-    
-        // see note at the top of this file
+        return nextBlock;
 
-    `else // 128-bit key
+    endfunction
 
-        roundKey = nextExpandedKey;
+`else // Expanding a 256-bit key
 
-    `endif // `ifdef AES_192
+    function automatic expandBlock(input integer round, expKeyBlock_t prevBlock);
 
-    `else // Expanding a 256-bit key
+        expKeyBlock_t nextBlock;
+
+        nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
 
         for (int i=1; i<=3; ++i)
             nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
@@ -55,21 +52,21 @@ begin
         for (int i=5; i<=7; ++i)
             nextExpandedKey.columns[i] = nextExpandedKey.columns[i-1] ^ prevExpandedKey.columns[i];
 
-        // see note at the top of this file
+        return nextBlock;
 
-    `endif // `ifndef AES_256
+    endfunction
 
-end
+`endif // `ifndef AES_256
 
-function automatic keyColumn_t ApplyRcon(input integer round, keyColumn_t in);
+function automatic expKeyColumn_t ApplyRcon(input integer round, expKeyColumn_t in);
 
     return in ^ (RCON[round] << (KEY_COL_SIZE-1));
 
 endfunction
 
-function automatic keyColumn_t SubBytes_4(input keyColumn_t in);
+function automatic expKeyColumn_t SubBytes_4(input expKeyColumn_t in);
 
-    keyColumn_t out;
+    expKeyColumn_t out;
 
     for(int i=0; i<=3; ++i)
     begin
@@ -80,9 +77,9 @@ function automatic keyColumn_t SubBytes_4(input keyColumn_t in);
 
 endfunction
 
-function automatic keyColumn_t Rot(input keyColumn_t in);
+function automatic expKeyColumn_t Rot(input expKeyColumn_t in);
 
-    return {in[KEY_COL_SIZE-2:0], in[KEY_COL_SIZE-1]};
+    return {in[1:KEY_COL_SIZE-1], in[0]};
 
 endfunction
 

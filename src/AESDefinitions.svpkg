@@ -6,12 +6,15 @@
   `ifdef AES_256
     `define KEY_SIZE 256
     `define NUM_ROUNDS 14
+    `define NUM_KEY_EXP_ROUNDS 8
   `elsif AES_192
     `define KEY_SIZE 192
     `define NUM_ROUNDS 12
+    `define NUM_KEY_EXP_ROUNDS 9
   `else
     `define KEY_SIZE 128
     `define NUM_ROUNDS 10
+    `define NUM_KEY_EXP_ROUNDS 11
   `endif
 
   //
@@ -30,10 +33,11 @@
   // Byte-oriented AES "Key" and "Round Key"
   typedef byte_t [0:KEY_BYTES-1] key_t;
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
-  typedef byte_t [KEY_NUM_COLS-1:0] keyColumn_t;
+  typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
+  typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
   typedef union packed {
-    key_t                           key;
-    keyColumn_t [KEY_NUM_COLS-1:0]  columns;
+    roundKey_t [0:`NUM_ROUNDS-1] roundKeys;
+    expKeyBlock_t [0:`NUM_KEY_EXP_ROUNDS-1] expBlocks;
   } expandedKey_t;
     
   endpackage : AESDefinitions
