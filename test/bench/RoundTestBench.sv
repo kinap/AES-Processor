@@ -7,12 +7,16 @@
 module RoundTestBench();
 
 // Input and Output connections
-logic [127:0] in, inInv, out, outInv;
-logic [`KEY_SIZE-1:0] key;
+logic [127:0] in, inInv, in2, inInv2, out, outInv, out2, outInv2;
+logic [`KEY_SIZE-1:0] key, key2, keyInv2;
 
 // Module declaration
 Round Dut(in, key, out);
 RoundInverse Dut2(inInv, key, outInv);
+
+// Test last round as a special case
+Round #(`NUM_ROUNDS) Dut3(in2, key2, out2);
+RoundInverse #(`NUM_ROUNDS) Dut4(inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;
@@ -48,6 +52,27 @@ begin
   end
 
   $finish();
+end
+
+// Special case testing for the last round
+bit [127:0] expected1 = 128'h69C4E0D86A7B0430D8CDB78070B4C55A, 
+            expected2 = 128'h00112233445566778899AABBCCDDEEFF;
+initial
+begin
+  RoundTester testerFinal;
+  testerFinal = new();
+
+  in2 = 128'hBD6E7C3DF2B5779E0B61216E8B10B689;
+  inInv2 = 128'h6353E08C0960E104CD70B751BACAD0E7;
+  key2 = 128'h13111D7FE3944A17F307A78B4D2B30C5;
+  keyInv2 = 128'h000102030405060708090A0B0C0D0E0F;
+  #1 repeat(1);
+  if(out2 !== expected1)
+    testerFinal.PrintError(in2, key2, out2, expected1, 0);
+
+  if(outInv2 !== expected2)
+    testerFinal.PrintError(inInv2, key2, outInv2, expected2, 1);
+
 end
 
 endmodule : RoundTestBench

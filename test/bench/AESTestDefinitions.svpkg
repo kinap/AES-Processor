@@ -153,18 +153,23 @@
     function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
       if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
       begin
-        $display("*** Error: Current output doesn't match expected");
-        if(encryptedIn)
-          $display("***        Inverse Phase");
-        else
-          $display("***        Normal Phase");
-        $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
-        $display("***        Key:      %h", curTest.roundKey);
-        $display("***        Output:   %h", out);
-        $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
+        PrintError((encryptedIn ? curTest.encrypted : curTest.plain), curTest.roundKey, out, (encryptedIn ? curTest.plain : curTest.encrypted), encryptedIn);
         $finish();
       end
     endfunction : Compare
+
+    function void PrintError(bit [127:0] in, key, out, expected, bit inverse);
+      $display("*** Error: Current output doesn't match expected");
+      if(inverse)
+        $display("***        Inverse Phase");
+      else
+        $display("***        Normal Phase");
+
+      $display("***        Input:    %h", in);
+      $display("***        Key:      %h", key);
+      $display("***        Output:   %h", out);
+      $display("***        Expected: %h", expected);
+    endfunction : PrintError
 
     function void ParseFileForTestCases(string testFile);
       bit [127:0] parse1, plain, encrypt, key;
@@ -182,9 +187,8 @@
           if(tempString.icompare("utput") == 0)
           begin
             // Drop the last round
-            // TODO: Figure out how to test the last round
-            inputs.pop_back();
-            inputs.pop_back();
+            void'(inputs.pop_back());
+            void'(inputs.pop_back());
             while(inputs.size() > 2)
             begin
               encrypt = inputs.pop_back();
