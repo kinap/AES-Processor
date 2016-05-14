@@ -6,8 +6,8 @@
 
 module Round(input state_t in, roundKey_t key,
              output state_t out);
-parameter Round = 1;
-localparam finalRound = ((Round == `NUM_ROUNDS) ? 1 : 0);
+parameter RoundNum = 1;
+localparam finalRound = ((RoundNum == `NUM_ROUNDS) ? 1 : 0);
 
 // State wire array
 state_t wires[3];
@@ -27,8 +27,8 @@ endmodule : Round
 
 module RoundInverse(input state_t in, roundKey_t key,
                     output state_t out);
-parameter Round = 1;
-localparam finalRound = (Round == `NUM_ROUNDS) ? 1 : 0;
+parameter RoundNum = 1;
+localparam finalRound = (RoundNum == `NUM_ROUNDS) ? 1 : 0;
 
 // State wire array
 state_t wires[3];
