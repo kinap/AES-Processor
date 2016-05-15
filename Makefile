@@ -22,7 +22,7 @@ COMPILE_FLAGS = -mfcu
 SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
 
-VLOG = \
+SRC_FILES = \
         $(SRC_DIR)/AESDefinitions.sv    \
         $(SRC_DIR)/ExpandKey.sv         \
         $(SRC_DIR)/AddRoundKey.sv       \
@@ -32,8 +32,9 @@ VLOG = \
         $(SRC_DIR)/MixColumns.sv        \
         $(SRC_DIR)/Round.sv             \
         $(SRC_DIR)/ShiftRows.sv         \
-        $(SRC_DIR)/SubBytes.sv			\
-		\
+        $(SRC_DIR)/SubBytes.sv
+
+TST_FILES = \
 		$(TST_DIR)/AESTestDefinitions.sv	\
 		$(TST_DIR)/AddRoundKeyTestBench.sv  \
 		$(TST_DIR)/MixColumnsTestBench.sv	\
@@ -43,7 +44,7 @@ VLOG = \
 		$(TST_DIR)/BufferedRoundTestBench.sv
 
 compile:
-	$(COMPILE_CMD) $(COMPILE_FLAGS) $(VLOG)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) $(SRC_FILES) $(TST_FILES)
 
 sim_subbytes:
 	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_FLAGS)
