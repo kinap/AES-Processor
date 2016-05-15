@@ -18,8 +18,8 @@ Buffer #(state_t) buffer(clock, reset, temp, out);
 
 endmodule : BufferedRound
 
-module BufferedInverseRound(input logic clock, reset,
-                            input state_t in, routndKey_t key,
+module BufferedRoundInverse(input logic clock, reset,
+                            input state_t in, roundKey_t key,
                             output state_t out);
 parameter RoundNum = 1;
 localparam finalRound = ((RoundNum == `NUM_ROUNDS) ? 1 : 0);
@@ -30,4 +30,4 @@ state_t temp;
 RoundInverse #(RoundNum) invRound(in, key, temp);
 Buffer #(state_t) buffer(clock, reset, temp, out);
 
-endmodule : BufferedInverseRound
+endmodule : BufferedRoundInverse

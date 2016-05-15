@@ -17,6 +17,10 @@
     `define NUM_KEY_EXP_ROUNDS 11
   `endif
 
+  // Basic definitions
+  `define TRUE 1'b1
+  `define FALSE 1'b0
+
   //
   // Types and sizes for AES
   //

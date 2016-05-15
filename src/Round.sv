@@ -1,5 +1,5 @@
 //
-// AES Round & InverseRound
+// AES Round & Inverse Round
 //
 
 `include "AESDefinitions.svpkg"
