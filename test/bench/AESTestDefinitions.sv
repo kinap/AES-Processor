@@ -39,6 +39,7 @@
     function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
       if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
       begin
+        $display("AES_SIM_ERROR");
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
           $display("***        Inverse Phase");
@@ -98,6 +99,7 @@
     function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
       if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
       begin
+        $display("AES_SIM_ERROR");
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
           $display("***        Inverse Phase");
@@ -161,6 +163,7 @@
     endfunction : Compare
 
     function void PrintError(bit [127:0] in, key, out, expected, bit inverse);
+      $display("AES_SIM_ERROR");
       $display("*** Error: Current output doesn't match expected");
       if(inverse)
         $display("***        Inverse Phase");
