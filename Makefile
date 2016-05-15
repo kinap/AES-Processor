@@ -39,7 +39,8 @@ VLOG = \
 		$(TST_DIR)/MixColumnsTestBench.sv	\
 		$(TST_DIR)/RoundTestBench.sv		\
 		$(TST_DIR)/ShiftRowsTestBench.sv	\
-		$(TST_DIR)/SubBytesTestBench.sv
+		$(TST_DIR)/SubBytesTestBench.sv     \
+		$(TST_DIR)/BufferedRoundTestBench.sv
 
 compile:
 	$(COMPILE_CMD) $(COMPILE_FLAGS) $(VLOG)
@@ -59,8 +60,12 @@ sim_addroundkey:
 sim_round:
 	$(SIMULATE_CMD) RoundTestBench $(SIMULATE_FLAGS)
 
+sim_buffered_round:
+	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_FLAGS)
+
 sim_all:
-	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round | tee $(SIM_LOG_FILE)
+	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round \
+		| tee $(SIM_LOG_FILE)
 	@printf $(BAR_START_LINE)
 	@grep $(SIM_ERROR_FIND_STR) $(SIM_LOG_FILE) > /dev/null;  \
 		if [ $$? -eq 0 ]; then printf $(SIM_FAIL); else printf $(SIM_PASS); fi
