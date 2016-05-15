@@ -2,7 +2,7 @@
 // Testbench for AddRoundKey stage of AES round
 //
 
-`include "./AESTestDefinitions.svpkg"
+import AESTestDefinitions::*;
 
 module AddRoundKeyTestBench();
 

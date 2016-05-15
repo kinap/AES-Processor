@@ -2,7 +2,7 @@
 // Testbench for MixColumns & Inverse MixColumns stage of AES round
 //
 
-`include "./AESTestDefinitions.svpkg"
+import AESTestDefinitions::*;
 
 module MixColumnsTestBench();
 

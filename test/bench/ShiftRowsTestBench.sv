@@ -2,7 +2,7 @@
 // Testbench for ShiftRows & Inverse ShiftRows stage of AES round
 //
 
-`include "./AESTestDefinitions.svpkg"
+import AESTestDefinitions::*;
 
 module ShiftRowsTestBench();
 

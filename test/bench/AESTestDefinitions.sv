@@ -1,7 +1,9 @@
 `ifndef AES_TEST_DEFINITIONS
   `define AES_TEST_DEFINITIONS
 
-  `include "../../src/AESDefinitions.svpkg"
+  package AESTestDefinitions;
+
+  import AESDefinitions::*;
 
   // Test storage structure
   typedef struct {
@@ -204,5 +206,7 @@
     endfunction : ParseFileForTestCases
 
   endclass : RoundTester
+
+  endpackage : AESTestDefinitions
 
 `endif
