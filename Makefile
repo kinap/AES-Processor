@@ -6,6 +6,17 @@
 MODE ?= puresim
 #MODE ?= veloce
 
+KEY_WIDTH ?= 128
+ifeq ($(KEY_WIDTH),128)
+    KEY_WIDTH_MACRO := AES_128
+else ifeq ($(KEY_WIDTH),192)
+    KEY_WIDTH_MACRO := AES_192
+else ifeq ($(KEY_WIDTH),256)
+    KEY_WIDTH_MACRO := AES_256
+else
+    $(error "Invalid key width specified")
+endif
+
 SRC_DIR ?= src
 TST_DIR ?= test/bench
 
@@ -17,7 +28,7 @@ SIM_PASS ?= "\n*** Simulation completed without failures. ***\n"
 BAR_END_LINE = "**********************************************\n\n\n"
 
 COMPILE_CMD = vlog
-COMPILE_FLAGS = -mfcu
+COMPILE_FLAGS = -mfcu +define+$(KEY_WIDTH_MACRO)
 
 SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
