@@ -2,7 +2,7 @@
 // Testbench for Round & Inverse Round stage of AES round
 //
 
-`include "./AESTestDefinitions.svpkg"
+import AESTestDefinitions::*;
 
 module BufferedRoundTestBench();
 parameter CLOCK_CYCLE = 20ns;
