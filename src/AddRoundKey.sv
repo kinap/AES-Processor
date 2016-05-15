@@ -2,7 +2,7 @@
 // AddRoundKey stage of the AES round
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
 
 module AddRoundKey(input state_t in, roundKey_t roundKey,
                   output state_t out);

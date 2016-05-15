@@ -2,7 +2,8 @@
 // Key Expansion Module
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
+import SBox::*;
 
 module ExpandKey(input key_t key, output expandedKey_t expandedKey);
 

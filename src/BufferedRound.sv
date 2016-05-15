@@ -2,7 +2,7 @@
 // Round module with buffering of the output
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
 
 module BufferedRound(input logic clock, reset,
                      input state_t in, roundKey_t key,

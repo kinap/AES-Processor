@@ -3,7 +3,8 @@
 // Reference: https://en.wikipedia.org/wiki/Rijndael_mix_columns
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
+import GaloisFieldFunctions::*;
 
 //
 // Matrix used to perform matrix multiplication in GF(2^8):

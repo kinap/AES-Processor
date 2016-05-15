@@ -2,7 +2,7 @@
 // SubBytes Layer of the AES round
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
 
 // TODO: Parameterize the substitution width for this module
 module SubBytes(input state_t in,

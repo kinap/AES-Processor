@@ -2,7 +2,7 @@
 // ShiftRows Layer of the AES round
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
 
 module ShiftRows(input state_t in, 
                  output state_t out);

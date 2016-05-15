@@ -53,10 +53,6 @@
     
   endpackage : AESDefinitions
 
-// TODO: we should get rid of all imports in this file, except what's absolutely necessary for
-// a package to work - we're polluting the global namespace and defeating the purpose of packages
-  import AESDefinitions::*;
-
 //
 // Selected byte-oriented arithmetic operations in GF(2^8).
 //
@@ -202,8 +198,6 @@ endfunction
 
 endpackage : GaloisFieldFunctions
 
-import GaloisFieldFunctions::*;
-
 package SBox;
 
 /* SBox Lookup table */
@@ -248,6 +242,5 @@ logic [0:15][0:15][7:0] invSbox =
 
 endpackage : SBox
 
-import SBox::*;
-
 `endif // AES_DEFINITIONS
+

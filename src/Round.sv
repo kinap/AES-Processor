@@ -2,7 +2,7 @@
 // AES Round & Inverse Round
 //
 
-`include "AESDefinitions.svpkg"
+import AESDefinitions::*;
 
 module Round(input state_t in, roundKey_t key,
              output state_t out);
