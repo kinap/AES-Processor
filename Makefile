@@ -28,7 +28,7 @@ SIM_PASS ?= "\n*** Simulation completed without failures. ***\n"
 BAR_END_LINE = "**********************************************\n\n\n"
 
 COMPILE_CMD = vlog
-COMPILE_FLAGS = -mfcu +define+$(KEY_WIDTH_MACRO)
+COMPILE_FLAGS = -mfcu 
 
 SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
@@ -54,8 +54,17 @@ TST_FILES = \
 		$(TST_DIR)/SubBytesTestBench.sv     \
 		$(TST_DIR)/BufferedRoundTestBench.sv
 
+ALL_FILES = $(SRC_FILES) $(TST_FILES)
+
+define check_sim
+	@printf $(BAR_START_LINE);	\
+	grep $(SIM_ERROR_FIND_STR) $(SIM_LOG_FILE) > /dev/null;  \
+               if [ $$? -eq 0 ]; then printf $(SIM_FAIL); else printf $(SIM_PASS); fi; \
+	printf $(BAR_END_LINE)
+endef
+
 compile:
-	$(COMPILE_CMD) $(COMPILE_FLAGS) $(SRC_FILES) $(TST_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES)
 
 sim_subbytes:
 	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_FLAGS)
@@ -78,17 +87,21 @@ sim_buffered_round:
 sim_all:
 	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round \
 		| tee $(SIM_LOG_FILE)
-	@printf $(BAR_START_LINE)
-	@grep $(SIM_ERROR_FIND_STR) $(SIM_LOG_FILE) > /dev/null;  \
-		if [ $$? -eq 0 ]; then printf $(SIM_FAIL); else printf $(SIM_PASS); fi
-	@printf $(BAR_END_LINE)
+	$(call check_sim)
 
-all: clean compile sim_all
+all:
+	$(MAKE) clean 
+	
+	for KEY_MACRO in AES_128 AES_192 AES_256 ; do	\
+		printf "\n$$KEY_MACRO\n" | tee -a $(SIM_LOG_FILE) ; \
+		$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$$KEY_MACRO $(ALL_FILES) ; \
+		$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round |  tee -a $(SIM_LOG_FILE) ; \
+	done
+
+	$(call check_sim)
 
 clean:
 	rm -rf work transcript $(SIM_LOG_FILE)
-
-
 
 # Commenting out original makefile - we'll want to keep it for reference later
 #
