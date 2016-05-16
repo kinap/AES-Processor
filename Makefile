@@ -21,10 +21,10 @@ SRC_DIR ?= src
 TST_DIR ?= test/bench
 
 SIM_LOG_FILE ?= sim_log.log
-SIM_ERROR_FIND_STR ?= AES_SIM_ERROR
+ERROR_REGEX ?= "Errors: [1-9]\|Warnings: [1-9]"
 BAR_START_LINE = "\n\n\n**********************************************"
-SIM_FAIL ?= "\n***     Simulation Error. Check Log.       ***\n"
-SIM_PASS ?= "\n*** Simulation completed without failures. ***\n"
+SIM_FAIL = "\n***  Simulation Error/Warning. Check Log.  ***\n"
+SIM_PASS = "\n*** Simulation completed without failures. ***\n"
 BAR_END_LINE = "**********************************************\n\n\n"
 
 COMPILE_CMD = vlog
@@ -46,19 +46,20 @@ SRC_FILES = \
         $(SRC_DIR)/SubBytes.sv
 
 TST_FILES = \
-		$(TST_DIR)/AESTestDefinitions.sv	\
-		$(TST_DIR)/AddRoundKeyTestBench.sv  \
-		$(TST_DIR)/MixColumnsTestBench.sv	\
-		$(TST_DIR)/RoundTestBench.sv		\
-		$(TST_DIR)/ShiftRowsTestBench.sv	\
-		$(TST_DIR)/SubBytesTestBench.sv     \
-		$(TST_DIR)/BufferedRoundTestBench.sv
+		$(TST_DIR)/AESTestDefinitions.sv		\
+		$(TST_DIR)/AddRoundKeyTestBench.sv  	\
+		$(TST_DIR)/MixColumnsTestBench.sv		\
+		$(TST_DIR)/RoundTestBench.sv			\
+		$(TST_DIR)/ShiftRowsTestBench.sv		\
+		$(TST_DIR)/SubBytesTestBench.sv     	\
+		$(TST_DIR)/BufferedRoundTestBench.sv	\
+		$(TST_DIR)/ExpandKeyTestBench.sv
 
 ALL_FILES = $(SRC_FILES) $(TST_FILES)
 
 define check_sim
 	@printf $(BAR_START_LINE);	\
-	grep $(SIM_ERROR_FIND_STR) $(SIM_LOG_FILE) > /dev/null;  \
+	grep $(ERROR_REGEX) $(SIM_LOG_FILE) > /dev/null;  \
                if [ $$? -eq 0 ]; then printf $(SIM_FAIL); else printf $(SIM_PASS); fi; \
 	printf $(BAR_END_LINE)
 endef
@@ -83,6 +84,9 @@ sim_round:
 
 sim_buffered_round:
 	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_FLAGS)
+
+sim_expandkey:
+	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_FLAGS)
 
 sim_all:
 	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round \

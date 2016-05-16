@@ -1,6 +1,11 @@
 `ifndef AES_TEST_DEFINITIONS
   `define AES_TEST_DEFINITIONS
 
+  // TODO: Remove AES_SIM_ERROR, replace $finish in error detection to $error
+
+  // TODO: Identify methods that are shared between all test classes (like
+  // GetNextTest and NumTests) and move them into a test superclass
+
   package AESTestDefinitions;
 
   import AESDefinitions::*;
@@ -16,6 +21,11 @@
     state_t encrypted;
     roundKey_t roundKey;
   } keyTest_t;
+
+  typedef struct {
+    key_t key;
+    expandedKey_t expandedKey;
+  } expandedKeyTest_t;
 
   //***************************************************************************************//
   class UnitTester;
@@ -209,6 +219,75 @@
     endfunction : ParseFileForTestCases
 
   endclass : RoundTester
+
+  //***************************************************************************************//
+  class KeyScheduleTester;
+    expandedKeyTest_t qTests[$];
+
+    `ifdef AES_128
+    string vectorHeader = "AES 128\n";
+    `elsif AES_192
+    string vectorHeader = "AES 192\n";
+    `else
+    string vectorHeader = "AES 256\n";
+    `endif 
+
+    function void AddTestCase(key_t cipherKey, expandedKey_t expandedKey);
+      expandedKeyTest_t newTest;
+      newTest.key = cipherKey;
+      newTest.expandedKey = expandedKey;
+      qTests.push_back(newTest);
+    endfunction : AddTestCase
+
+    function expandedKeyTest_t GetNextTest();
+      return qTests.pop_front();
+    endfunction : GetNextTest
+
+    function int NumTests();
+      return qTests.size();
+    endfunction : NumTests
+
+    function void Compare(expandedKeyTest_t curTest, expandedKey_t expandedKey);
+    if(curTest.expandedKey !== expandedKey)
+      begin
+        $display("AES_SIM_ERROR");
+        $display("*** Error: Current output doesn't match expected");
+        $display("***        Cipher Key:\t%h", curTest.key);
+        $display("***        Expected & Actual:");
+        $display("***   EXP: %0h", curTest.expandedKey);
+        $display("***   ACT: %0h", expandedKey);
+        $finish();
+      end
+    endfunction : Compare
+
+    function void ParseFileForTestCases(string vectorFile);
+      key_t key;
+      expandedKey_t expandedKey;
+      string header;
+      int i, file;
+
+      file = $fopen(vectorFile, "r");
+
+      // advance file pointer to appropriate section header for key width
+      i = $fscanf(file, "%s\n", header);
+      while (!$feof(file) && vectorHeader.icompare(header) != 0)
+        i = $fscanf(file, "%s\n", header);
+
+      while(!$feof(file))
+      begin
+        i = $fscanf(file, "%h %h\n", key, expandedKey.roundKeys.keys);
+        if (i < 1)
+          break;
+
+        AddTestCase(key, expandedKey);
+        expandedKey = '0;
+      end 
+
+      $fclose(file);
+
+    endfunction : ParseFileForTestCases
+
+  endclass : KeyScheduleTester
 
   endpackage : AESTestDefinitions
 
