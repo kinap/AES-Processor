@@ -93,9 +93,9 @@ class StimulusGeneration;
   function new();
   begin
     driver = new("Transactor.inputpipe");
-    plain_file = $fopen("test/vector/plain.txt", rb);
-    encrypted_file = $fopen("test/vector/encrypted.txt", rb);
-    key_file = $fopen("test/vector/key.txt", rb);
+    plain_file = $fopen("test/vector/plain.txt", "rb");
+    encrypted_file = $fopen("test/vector/encrypted.txt", "rb");
+    key_file = $fopen("test/vector/key.txt", "rb");
   end
   endfunction : new
 

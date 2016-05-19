@@ -45,6 +45,7 @@ scemi_output_pipe #(.BYTES_PER_ELEMENT(AES_STATE_SIZE),
 //XRTL FSM to obtain operands from the HVL side
 inputTest_t testIn;
 state_t [1:0] testOut;
+bit eom = 0;
 logic [7:0] ne_valid = 0;
 int eom;
 
