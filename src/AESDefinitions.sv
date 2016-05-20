@@ -36,11 +36,13 @@
   typedef logic [7:0] byte_t;
   typedef byte_t [0:AES_STATE_SIZE-1] state_t;
 
-  // Byte-oriented AES "Key" and "Round Key"
   typedef byte_t [0:KEY_BYTES-1] key_t;
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
   typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
   typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
+  // TODO: get rid of the padding - control loop terminating conditions better
+  // in the ExpandKey module and this won't be necessary
+  // Byte-oriented AES "Key" and "Round Key"
   typedef struct packed {
     roundKey_t [0:`NUM_ROUNDS-1] keys;
     expKeyColumn_t [0:EXP_KEY_PAD_COLS-1] padding;
