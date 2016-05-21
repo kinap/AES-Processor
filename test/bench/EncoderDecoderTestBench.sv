@@ -29,7 +29,7 @@ class ScoreBoard;
 
   function new();
   begin
-    monitor = new("Transactor.outptupipe");
+    monitor = new("Transactor.outputpipe");
   end
   endfunction : new
 

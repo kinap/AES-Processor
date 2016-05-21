@@ -47,7 +47,7 @@ inputTest_t testIn;
 state_t [1:0] testOut;
 bit eom = 0;
 logic [7:0] ne_valid = 0;
-int eom;
+//int eom;
 
 always @(posedge clock)
 begin
