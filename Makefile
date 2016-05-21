@@ -19,6 +19,7 @@ endif
 
 SRC_DIR ?= src
 TST_DIR ?= test/bench
+HVL_DIR ?= test/hvl
 
 SIM_LOG_FILE ?= sim_log.log
 ERROR_REGEX ?= "Errors: [1-9]\|Warnings: [1-9]"
@@ -41,9 +42,7 @@ TST_FILES = \
 	$(TST_DIR)/AESTestDefinitions.sv \
 	$(TST_DIR)/*.sv
 
-HVL_FILES = $(SRC_DIR)/AESDefinitions.sv \
-            $(TST_DIR)/AESTestDefinitions.sv \
-            $(TST_DIR)/EncoderDecoderTestBench.sv \
+HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 
 ALL_FILES = $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 
@@ -55,16 +54,16 @@ define check_sim
 endef
 
 compile:
+
 	vlib $(MODE)work
 	vmap work $(MODE)work
 	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f
 ifeq ($(MODE),puresim)
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 else
 	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES)
         velcomp -top EncoderDecoderTestBench
 endif
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(HVL_FILES)
 	velhvl -sim $(MODE)
 
 sim_subbytes:
@@ -108,7 +107,7 @@ all:
 	$(call check_sim)
 
 clean:
-	rm -rf work transcript $(SIM_LOG_FILE)
+	rm -rf work transcript $(SIM_LOG_FILE) 
 	rm -rf velocework puresimwork veloce.log
 
 
