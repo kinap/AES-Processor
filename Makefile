@@ -107,7 +107,7 @@ all:
 
 clean:
 	rm -rf work transcript $(SIM_LOG_FILE)
-	rm -rf velocework puresimwork
+	rm -rf velocework puresimwork veloce.log
 
 
 # Commenting out original makefile - we'll want to keep it for reference later
