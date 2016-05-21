@@ -38,8 +38,10 @@ SRC_FILES = \
         $(SRC_DIR)/*.sv
 
 TST_FILES = \
-		$(TST_DIR)/AESTestDefinitions.sv \
-		$(TST_DIR)/*.sv
+	$(TST_DIR)/AESTestDefinitions.sv \
+	$(TST_DIR)/*.sv
+
+HVL_FILES = $(TST_DIR)/EncoderDecoderTestBench.sv
 
 ALL_FILES = $(SRC_FILES) $(TST_FILES)
 
@@ -51,7 +53,17 @@ define check_sim
 endef
 
 compile:
+	vlib $(MODE)work
+	vmap work $(MODE)work
+	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f
+ifeq ($(MODE),puresim)
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES)
+else
+	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES)
+        velcomp -top EncoderDecoderTestBench
+endif
+	$(COMPILE_CMD) $(HVL_FILES)
+	velhvl -sim $(MODE)
 
 sim_subbytes:
 	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_FLAGS)
@@ -74,8 +86,11 @@ sim_buffered_round:
 sim_expandkey:
 	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_FLAGS)
 
+sim_encoder_decoder:
+	$(SIMULATE_CMD) EncoderDecoderTestBEnch Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+
 sim_all:
-	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round \
+	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round sim_encoder_decoder \
 		| tee $(SIM_LOG_FILE)
 	$(call check_sim)
 
@@ -92,6 +107,8 @@ all:
 
 clean:
 	rm -rf work transcript $(SIM_LOG_FILE)
+	rm -rf velocework puresimwork
+
 
 # Commenting out original makefile - we'll want to keep it for reference later
 #

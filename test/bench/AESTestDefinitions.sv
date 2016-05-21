@@ -11,21 +11,26 @@
   import AESDefinitions::*;
 
   // Test storage structure
-  typedef struct {
+  typedef struct packed {
     state_t plain;
     state_t encrypted;
   } test_t;  
 
-  typedef struct {
+  typedef struct packed {
     state_t plain;
     state_t encrypted;
     roundKey_t roundKey;
   } keyTest_t;
 
-  typedef struct {
+  typedef struct packed {
     key_t key;
     expandedKey_t expandedKey;
   } expandedKeyTest_t;
+
+  typedef struct packed {
+    state_t data;
+    key_t key;
+  } inputTest_t;
 
   //***************************************************************************************//
   class UnitTester;
