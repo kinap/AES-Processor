@@ -28,7 +28,8 @@
   } expandedKeyTest_t;
 
   typedef struct packed {
-    state_t data;
+    state_t plain;
+    state_t encrypt;
     key_t key;
   } inputTest_t;
 

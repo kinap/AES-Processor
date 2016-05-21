@@ -41,9 +41,11 @@ TST_FILES = \
 	$(TST_DIR)/AESTestDefinitions.sv \
 	$(TST_DIR)/*.sv
 
-HVL_FILES = $(TST_DIR)/EncoderDecoderTestBench.sv
+HVL_FILES = $(SRC_DIR)/AESDefinitions.sv \
+            $(TST_DIR)/AESTestDefinitions.sv \
+            $(TST_DIR)/EncoderDecoderTestBench.sv \
 
-ALL_FILES = $(SRC_FILES) $(TST_FILES)
+ALL_FILES = $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 
 define check_sim
 	@printf $(BAR_START_LINE);	\
@@ -62,7 +64,7 @@ else
 	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES)
         velcomp -top EncoderDecoderTestBench
 endif
-	$(COMPILE_CMD) $(HVL_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(HVL_FILES)
 	velhvl -sim $(MODE)
 
 sim_subbytes:

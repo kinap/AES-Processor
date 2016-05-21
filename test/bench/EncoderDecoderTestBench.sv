@@ -14,7 +14,6 @@ int key_file;
 
 // Store sent data and expected encrypted output in a queue;
 inputTest_t sentTests [$];
-state_t encryptedTests [$];
 int errorCount = 0;
 
 // Scoreboard class
@@ -24,6 +23,7 @@ class ScoreBoard;
   key_t key;
   state_t outEncrypted, outDecrypted,
           expectEncrypted, expectDecrypted;
+  inputTest_t curTest;
 
   scemi_dynamic_output_pipe monitor;
 
@@ -53,8 +53,12 @@ class ScoreBoard;
         outDecrypted = {result[i],outDecrypted[0:AES_STATE_SIZE-9]};
       end
 
-      expectEncrypted = encryptedTests.pop_front();
-      expectDecrypted = sentTests.pop_front();
+      curTest = sentTests.pop_front();
+      expectEncrypted = curTest.encrypt;
+      expectDecrypted = curTest.plain;
+
+      $display("outEncrypted: %h", outEncrypted);
+      $display("outDecrypted: %h", outDecrypted);
 
       if(outEncrypted !== expectEncrypted)
       begin
@@ -72,8 +76,8 @@ class ScoreBoard;
         errorCount++;
       end
  
-      if(eom_flag)
-        $finish;
+      if(eom_flag && (sentTests.size() == 0))
+          $finish;
     end
   endtask : run
 
@@ -96,36 +100,44 @@ class StimulusGeneration;
     plain_file = $fopen("test/vectors/plain.txt", "rb");
     encrypted_file = $fopen("test/vectors/encrypted.txt", "rb");
     key_file = $fopen("test/vectors/key.txt", "rb");
+    
+    // Push enough "dummy" tests to allow the encoder/decoder to output real data
+    for(int j = 0; j <= `NUM_ROUNDS; j++)
+    begin
+      test = '0;
+      sentTests.push_back(test);
+    end
   end
   endfunction : new
 
   task run;
-    automatic int counter = 0;
-    automatic byte unsigned plainByte, encryptedByte, keyByte;
-    automatic byte unsigned dataSend[] = new[AES_STATE_SIZE+KEY_BYTES];
-    while(!$feof(plain_file) && !$feof(encrypted_file) && $feof(key_file))
+    automatic byte unsigned dataSend[] = new[2*AES_STATE_SIZE+KEY_BYTES];
+    while(!$feof(plain_file) && !$feof(encrypted_file) && !$feof(key_file))
     begin
-      counter++;
-      plainByte = $fgetc(plain_file);
-      encryptedByte = $fgetc(encrypted_file);
-      keyByte = $fgetc(key_file);
-      inData[AES_STATE_SIZE-counter] = plainByte;
-      expected[AES_STATE_SIZE-counter] = encryptedByte;
-      keyData[AES_STATE_SIZE-counter] = keyByte;
-      if(counter == AES_STATE_SIZE)
+      // Read in plain and encrypted data and key
+      i = $fscanf(plain_file, "%h", inData);
+      $display("%m, inData: %h", inData);
+      i = $fscanf(encrypted_file, "%h", expected);
+      $display("%m, expected: %h", expected);
+      i = $fscanf(key_file, "%h", keyData);
+      $display("%m, key: %h", keyData);
+      
+      // Create a test and push it to the queue
+      test.plain = inData;
+      test.encrypt = expected;
+      test.key = keyData;
+      sentTests.push_back(test);
+      
+      $display("%m, %h", test);
+      // Convert the data to an array to send
+      foreach(dataSend[i])
       begin
-        test.data = inData;
-        test.key = keyData;
-        sentTests.push_back(test);
-        encryptedTests.push_back(expected);
-        foreach(dataSend[i])
-        begin
-          dataSend[i] = test[7:0];
-          dataSend = {8'b0,test[AES_STATE_SIZE+KEY_BYTES-1:8]};
-        end
-
-        driver.send_bytes(1, dataSend, 0);
+        dataSend[i] = test[$bits(test)-1:$bits(test)-8];
+        test = {test, 8'b0};
       end
+      $display("%m, %h", dataSend);
+
+      driver.send_bytes(1, dataSend, 0);
     end
 
     //Sent eom and flush the pipe
@@ -161,14 +173,14 @@ module EncoderDecoderTestBench;
     fork
       scb = new();
       stim = new();
-      $display("\nStarted at:"); $system("data");
+      $display("\nStarted at:"); $system("date");
       run();
     join_none
   end
 
   final
   begin
-    $display("\nEnded at:"); $system("data");
+    $display("\nEnded at:"); $system("date");
     if(!errorCount)
       $display("All tests pass sucessfully");
     else

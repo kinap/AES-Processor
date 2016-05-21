@@ -24,14 +24,14 @@ begin
 end
 
 // DUT Instantiation
-key_t inputKey, decoderKey;
-state_t inputData, encryptData, outputData;
+key_t inputKey;
+state_t plainData, encryptData, outputEncrypt, outputPlain;
 
-AESEncoder encoder(clock, reset, inputData, inputKey, encryptData);
-AESDecoder decoder(clock, reset, encryptdata, decoderKey, outputData);
+AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt);
+AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain);
 
 // Input Pipe Instantiation
-scemi_input_pipe #(.BYTES_PER_ELEMENT(AES_STATE_SIZE+KEY_BYTES),
+scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
                    .PAYLOAD_MAX_ELEMENTS(1),
                    .BUFFER_MAX_ELEMENTS(100)
                   ) inputpipe(clock);
@@ -52,18 +52,20 @@ always @(posedge clock)
 begin
   if(reset)
   begin
-    inputData <= '0;
+    plainData <= '0;
+    encryptData <= '0;
     inputKey <= '0;
   end
   else
   begin
-    testOut = {encryptData, outputData};
+    testOut = {outputEncrypt, outputPlain};
     outputpipe.send(2,testOut,eom);
 
     if(!eom)
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
-      inputData <= testIn.data;
+      plainData <= testIn.plain;
+      encryptData <= testIn.encrypt;
       inputKey <= testIn.key;
     end
   end
