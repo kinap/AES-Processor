@@ -10,12 +10,14 @@ module AESEncoder(input logic clock, reset,
 
 state_t roundOutput[`NUM_ROUNDS];
 roundKey_t roundKey[`NUM_ROUNDS];
+state_t tmp;
 
 // Key expansion block - outside the rounds
 ExpandKey keyExpBlock (key, roundKey[0]);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKey[0], roundOutput[0]);
+AddRoundKey firstRound(in, roundKey[0], tmp);
+Buffer firstRoundBuffer(clock, reset, tmp, roundOutput[0]);
 
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
@@ -38,12 +40,14 @@ module AESDecoder(input logic clock, reset,
 
 state_t roundOutput[`NUM_ROUNDS];
 roundKey_t roundKey[`NUM_ROUNDS];
+state_t tmp;
 
 // Key expansion block - outside the rounds
 ExpandKey keyExpBlock (key, roundKey[0]);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKey[0], roundOutput[0]);
+AddRoundKey firstRound(in, roundKey[0], tmp);
+Buffer firstRoundBuffer(clock, reset, tmp, roundOutput[0]);
 
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
