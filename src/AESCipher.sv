@@ -17,7 +17,7 @@ ExpandKey keyExpBlock (key, roundKey[0]);
 
 // First round - add key only
 AddRoundKey firstRound(in, roundKey[0], tmp);
-Buffer firstRoundBuffer(clock, reset, tmp, roundOutput[0]);
+Buffer #(state_t) firstRoundBuffer(clock, reset, tmp, roundOutput[0]);
 
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
