@@ -24,11 +24,11 @@ begin
 end
 
 // DUT Instantiation
-key_t inputKey;
+key_t inputKey, decoderKey;
 state_t inputData, encryptData, outputData;
 
-AESEncoder encoder(inputData, encrypData);
-AESDecoder decoder(encryptdata, outputData);
+AESEncoder encoder(clock, reset, inputData, inputKey, encryptData);
+AESDecoder decoder(clock, reset, encryptdata, decoderKey, outputData);
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(AES_STATE_SIZE+KEY_BYTES),
