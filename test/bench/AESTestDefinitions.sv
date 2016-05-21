@@ -24,7 +24,7 @@
 
   typedef struct packed {
     key_t key;
-    expandedKey_t expandedKey;
+    roundKeys_t roundKeys;
   } expandedKeyTest_t;
 
 /*  typedef struct packed {
@@ -231,17 +231,17 @@
     expandedKeyTest_t qTests[$];
 
     `ifdef AES_128
-    string vectorHeader = "AES 128\n";
+    string vectorHeader = "AES_128";
     `elsif AES_192
-    string vectorHeader = "AES 192\n";
+    string vectorHeader = "AES_192";
     `else
-    string vectorHeader = "AES 256\n";
+    string vectorHeader = "AES_256";
     `endif 
 
-    function void AddTestCase(key_t cipherKey, expandedKey_t expandedKey);
+    function void AddTestCase(key_t cipherKey, roundKeys_t roundKeys);
       expandedKeyTest_t newTest;
       newTest.key = cipherKey;
-      newTest.expandedKey = expandedKey;
+      newTest.roundKeys = roundKeys;
       qTests.push_back(newTest);
     endfunction : AddTestCase
 
@@ -253,22 +253,40 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(expandedKeyTest_t curTest, expandedKey_t expandedKey);
-    if(curTest.expandedKey !== expandedKey)
+    function void Compare(expandedKeyTest_t curTest, roundKey_t roundKeys);
+
+      `ifdef VERBOSE
+        $display("***   Key Size:\t%d", `KEY_SIZE);
+        $display("*** Num Rounds:\t%d", `NUM_ROUNDS);
+        $display("*** Cipher Key:\t%h", curTest.key);
+      `endif
+
+      for (int i=0; i<=`NUM_ROUNDS; ++i)
       begin
-        $display("AES_SIM_ERROR");
-        $display("*** Error: Current output doesn't match expected");
-        $display("***        Cipher Key:\t%h", curTest.key);
-        $display("***        Expected & Actual:");
-        $display("***   EXP: %0h", curTest.expandedKey);
-        $display("***   ACT: %0h", expandedKey);
-        $finish();
+
+        `ifdef VERBOSE
+          $display("***      Round:\t%0d", i);
+          $display("***   Expected:\t%h", curTest.roundKeys[i]);
+          $display("***     Actual:\t%h", roundKeys[i]);
+        `endif
+          
+        if(curTest.roundKeys[i] !== roundKeys[i])
+        begin
+          $display("AES_SIM_ERROR");
+          $display("***      Error: Round key doesn't match expected");
+          $display("***      Round:\t%0d", i);
+          $display("*** Cipher Key:\t%h", curTest.key);
+          $display("***   Expected:\t%h", curTest.roundKeys[i]);
+          $display("***     Actual:\t%h", roundKeys[i]);
+          $finish();
+        end
+
       end
     endfunction : Compare
 
     function void ParseFileForTestCases(string vectorFile);
       key_t key;
-      expandedKey_t expandedKey;
+      roundKeys_t roundKeys;
       string header;
       int i, file;
 
@@ -278,15 +296,16 @@
       i = $fscanf(file, "%s\n", header);
       while (!$feof(file) && vectorHeader.icompare(header) != 0)
         i = $fscanf(file, "%s\n", header);
-
+        
       while(!$feof(file))
       begin
-        i = $fscanf(file, "%h %h\n", key, expandedKey.roundKeys.keys);
-        if (i < 1)
+        i = $fscanf(file, "%h %h\n", key, roundKeys);
+        if (i < 2)
           break;
+        $display("i: %d", i);
+        $display("Key: %h\tRound Keys: %h", key, roundKeys);
 
-        AddTestCase(key, expandedKey);
-        expandedKey = '0;
+        AddTestCase(key, roundKeys);
       end 
 
       $fclose(file);

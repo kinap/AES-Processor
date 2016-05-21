@@ -6,16 +6,14 @@ import AESTestDefinitions::*;
 
 module ExpandKeyTestBench();
 
-// Input and Output connections
 key_t key;
-expandedKey_t expandedKey;
+roundKeys_t roundKeys;
 expandedKeyTest_t curTest;
 int testCount = 0;
 
-// Module under test instantiation
 ExpandKey mut(
     .key(key), 
-    .expandedKey(expandedKey)
+    .roundKeys(roundKeys)
 );
 
 initial
@@ -23,13 +21,20 @@ begin
   KeyScheduleTester tester;
   tester = new();
   tester.ParseFileForTestCases("test/vectors/key_schedule_vectors.txt");
+  
+  $display("ROUND_KEY_COLS: %0d", mut.ROUND_KEY_COLS);
+  $display("KEY_SCH_COLS: %0d", mut.KEY_SCH_COLS);
+  $display("KEY_SCH_SHIFT: %0d", mut.KEY_SCH_SHIFT);
+  $display("Num tests: %d", tester.NumTests());
+  $monitor("Round Key Cols: %h\n mut.roundKeys: %h", mut.keyBlocks, mut.roundKeys);
 
   while(tester.NumTests() != 0)
   begin
     curTest = tester.GetNextTest();
     key = curTest.key;
     #1
-    tester.Compare(curTest, expandedKey);
+    tester.Compare(curTest, roundKeys);
+    ++testCount;
   end
 
   $display("ExpandKeyTestBench executed %0d test cases", testCount);

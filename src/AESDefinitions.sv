@@ -1,20 +1,17 @@
 `ifndef AES_DEFINITIONS
   `define AES_DEFINITIONS
 
-  package AESDefinitions;
+package AESDefinitions;
   // Set key size based on define
   `ifdef AES_256
     `define KEY_SIZE 256
     `define NUM_ROUNDS 14
-    `define NUM_KEY_EXP_ROUNDS 8
   `elsif AES_192
     `define KEY_SIZE 192
     `define NUM_ROUNDS 12
-    `define NUM_KEY_EXP_ROUNDS 9
   `else
     `define KEY_SIZE 128
     `define NUM_ROUNDS 10
-    `define NUM_KEY_EXP_ROUNDS 11
   `endif
 
   // Basic definitions
@@ -28,8 +25,6 @@
   parameter AES_STATE_NUM_COLS = AES_STATE_SIZE / 4;
   parameter KEY_BYTES = `KEY_SIZE / 8;
   parameter KEY_COL_SIZE = 4;
-  parameter KEY_NUM_COLS = KEY_BYTES / KEY_COL_SIZE;
-  parameter EXP_KEY_PAD_COLS = ((KEY_NUM_COLS*`NUM_KEY_EXP_ROUNDS) - (AES_STATE_NUM_COLS*`NUM_ROUNDS));
 
   // Byte-oriented AES "State"
   // Byte indices 0-3 are the first column, 4-7 are the second column, etc.
@@ -38,22 +33,9 @@
 
   typedef byte_t [0:KEY_BYTES-1] key_t;
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
-  typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
-  typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
-  // TODO: get rid of the padding - control loop terminating conditions better
-  // in the ExpandKey module and this won't be necessary
-  // Byte-oriented AES "Key" and "Round Key"
-  typedef struct packed {
-    roundKey_t [0:`NUM_ROUNDS-1] keys;
-    expKeyColumn_t [0:EXP_KEY_PAD_COLS-1] padding;
-  } paddedRoundKeys_t;
-    
-  typedef union packed {
-    paddedRoundKeys_t roundKeys;
-    expKeyBlock_t [0:`NUM_KEY_EXP_ROUNDS-1] expBlocks;
-  } expandedKey_t;
-    
-  endpackage : AESDefinitions
+  typedef roundKey_t [0:`NUM_ROUNDS] roundKeys_t;
+
+endpackage : AESDefinitions
 
 //
 // Selected byte-oriented arithmetic operations in GF(2^8).
