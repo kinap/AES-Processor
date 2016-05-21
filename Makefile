@@ -67,25 +67,25 @@ endif
 	velhvl -sim $(MODE)
 
 sim_subbytes:
-	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) SubBytesTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_shiftrows:
-	$(SIMULATE_CMD) ShiftRowsTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) ShiftRowsTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_mixcolumns:
-	$(SIMULATE_CMD) MixColumnsTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) MixColumnsTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_addroundkey:
-	$(SIMULATE_CMD) AddRoundKeyTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) AddRoundKeyTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_round:
-	$(SIMULATE_CMD) RoundTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) RoundTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_buffered_round:
-	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) BufferedRoundTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_expandkey:
-	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_FLAGS)
+	$(SIMULATE_CMD) ExpandKeyTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_encoder_decoder:
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
