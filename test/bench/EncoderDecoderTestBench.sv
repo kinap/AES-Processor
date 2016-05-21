@@ -29,7 +29,7 @@ class ScoreBoard;
 
   function new();
   begin
-    monitor = new("Transactor.outptupipe");
+    monitor = new("Transactor.outputpipe");
   end
   endfunction : new
 
@@ -53,14 +53,14 @@ class ScoreBoard;
         outDecrypted = {result[i],outDecrypted[0:AES_STATE_SIZE-9]};
       end
 
-      expectEncrypted = encryptedTest.pop_front;
-      expectDecrypted = sentTest.pop_front;
+      expectEncrypted = encryptedTests.pop_front();
+      expectDecrypted = sentTests.pop_front();
 
       if(outEncrypted !== expectEncrypted)
       begin
         $display("***Error: Encrypted output doesn't match expected");
         $display("***       Encrypted output: %h", outEncrypted);
-        $display("***       Expected:         %h", expectedEncrypted);
+        $display("***       Expected:         %h", expectEncrypted);
         errorCount++;
       end
 
@@ -68,7 +68,7 @@ class ScoreBoard;
       begin
         $display("***Error: Decrypted output doesn't match expected");
         $display("***       Decrypted output: %h", outDecrypted);
-        $display("***       Expected:         %h", expectedDecrypted);
+        $display("***       Expected:         %h", expectDecrypted);
         errorCount++;
       end
  
@@ -93,9 +93,9 @@ class StimulusGeneration;
   function new();
   begin
     driver = new("Transactor.inputpipe");
-    plain_file = $fopen("test/vector/plain.txt", "rb");
-    encrypted_file = $fopen("test/vector/encrypted.txt", "rb");
-    key_file = $fopen("test/vector/key.txt", "rb");
+    plain_file = $fopen("test/vectors/plain.txt", "rb");
+    encrypted_file = $fopen("test/vectors/encrypted.txt", "rb");
+    key_file = $fopen("test/vectors/key.txt", "rb");
   end
   endfunction : new
 

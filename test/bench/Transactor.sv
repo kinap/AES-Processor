@@ -47,7 +47,6 @@ inputTest_t testIn;
 state_t [1:0] testOut;
 bit eom = 0;
 logic [7:0] ne_valid = 0;
-int eom;
 
 always @(posedge clock)
 begin
@@ -63,7 +62,7 @@ begin
 
     if(!eom)
     begin
-      inputpipe.recieve(1,ne_valid,testIn,eom);
+      inputpipe.receive(1,ne_valid,testIn,eom);
       inputData <= testIn.data;
       inputKey <= testIn.key;
     end

@@ -87,7 +87,7 @@ sim_expandkey:
 	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_FLAGS)
 
 sim_encoder_decoder:
-	$(SIMULATE_CMD) EncoderDecoderTestBEnch Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_all:
 	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round sim_encoder_decoder \
