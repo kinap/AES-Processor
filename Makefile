@@ -34,26 +34,12 @@ SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
 
 SRC_FILES = \
-        $(SRC_DIR)/AESDefinitions.sv    \
-        $(SRC_DIR)/ExpandKey.sv         \
-        $(SRC_DIR)/AddRoundKey.sv       \
-        $(SRC_DIR)/BufferedRound.sv     \
-        $(SRC_DIR)/Buffer.sv            \
-        $(SRC_DIR)/ExpandKey.sv         \
-        $(SRC_DIR)/MixColumns.sv        \
-        $(SRC_DIR)/Round.sv             \
-        $(SRC_DIR)/ShiftRows.sv         \
-        $(SRC_DIR)/SubBytes.sv
+        $(SRC_DIR)/AESDefinitions.sv \
+        $(SRC_DIR)/*.sv
 
 TST_FILES = \
-		$(TST_DIR)/AESTestDefinitions.sv		\
-		$(TST_DIR)/AddRoundKeyTestBench.sv  	\
-		$(TST_DIR)/MixColumnsTestBench.sv		\
-		$(TST_DIR)/RoundTestBench.sv			\
-		$(TST_DIR)/ShiftRowsTestBench.sv		\
-		$(TST_DIR)/SubBytesTestBench.sv     	\
-		$(TST_DIR)/BufferedRoundTestBench.sv	\
-		$(TST_DIR)/ExpandKeyTestBench.sv
+		$(TST_DIR)/AESTestDefinitions.sv \
+		$(TST_DIR)/*.sv
 
 ALL_FILES = $(SRC_FILES) $(TST_FILES)
 
