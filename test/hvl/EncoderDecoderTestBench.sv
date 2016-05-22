@@ -57,8 +57,8 @@ class ScoreBoard;
       expectEncrypted = curTest.encrypt;
       expectDecrypted = curTest.plain;
 
-      $display("outEncrypted: %h", outEncrypted);
-      $display("outDecrypted: %h", outDecrypted);
+      //$display("outEncrypted: %h", outEncrypted);
+      //$display("outDecrypted: %h", outDecrypted);
 
       if(outEncrypted !== expectEncrypted)
       begin
@@ -116,11 +116,11 @@ class StimulusGeneration;
     begin
       // Read in plain and encrypted data and key
       i = $fscanf(plain_file, "%h", inData);
-      $display("%m, inData: %h", inData);
+      //$display("%m, inData: %h", inData);
       i = $fscanf(encrypted_file, "%h", expected);
-      $display("%m, expected: %h", expected);
+      //$display("%m, expected: %h", expected);
       i = $fscanf(key_file, "%h", keyData);
-      $display("%m, key: %h", keyData);
+      //$display("%m, key: %h", keyData);
       
       // Create a test and push it to the queue
       test.plain = inData;
@@ -128,14 +128,14 @@ class StimulusGeneration;
       test.key = keyData;
       sentTests.push_back(test);
       
-      $display("%m, %h", test);
+      //$display("%m, %h", test);
       // Convert the data to an array to send
       foreach(dataSend[i])
       begin
         dataSend[i] = test[$bits(test)-1:$bits(test)-8];
         test = {test, 8'b0};
       end
-      $display("%m, %h", dataSend);
+      //$display("%m, %h", dataSend);
 
       driver.send_bytes(1, dataSend, 0);
     end

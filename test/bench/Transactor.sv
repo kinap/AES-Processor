@@ -58,15 +58,22 @@ begin
   end
   else
   begin
+    //$display("outputEncrypt: %h", outputEncrypt);
+    //$display("outputPlain: %h", outputPlain);
     testOut = {outputEncrypt, outputPlain};
     outputpipe.send(2,testOut,eom);
 
     if(!eom)
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
+      testIn = {<<byte{testIn}};
+      //$display("testIn: %h", testIn);
       plainData <= testIn.plain;
+      //$display("plain: %h", testIn.plain);
       encryptData <= testIn.encrypt;
+      //$display("encrypt: %h", testIn.encrypt);
       inputKey <= testIn.key;
+      //$display("key: %h", testIn.key);
     end
   end
 end
