@@ -44,8 +44,6 @@ TST_FILES = \
 
 HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 
-ALL_FILES = $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
-
 define check_sim
 	@printf $(BAR_START_LINE);	\
 	grep $(ERROR_REGEX) $(SIM_LOG_FILE) > /dev/null;  \
