@@ -253,7 +253,7 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(expandedKeyTest_t curTest, roundKey_t roundKeys);
+    function void Compare(expandedKeyTest_t curTest, roundKeys_t roundKeys);
 
       `ifdef VERBOSE
         $display("***   Key Size:\t%d", `KEY_SIZE);
