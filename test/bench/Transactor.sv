@@ -2,9 +2,15 @@
 // Top level testbench on the HDL side. Contains XRTL Transactor
 //
 
-import AESTestDefinitions::*;
+import AESDefinitions::*;
 
-module Transactor();
+typedef struct packed {
+  state_t plain;
+  state_t encrypt;
+  key_t key;
+} inputTest_t;
+
+module Transactor;
 
 // Clock generation
 logic clock;
@@ -17,6 +23,7 @@ end
 
 // Reset generation
 logic reset;
+//tbx clkgen
 initial
 begin
   reset = 1;

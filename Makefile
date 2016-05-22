@@ -35,8 +35,8 @@ SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
 
 SRC_FILES = \
-        $(SRC_DIR)/AESDefinitions.sv \
-        $(SRC_DIR)/*.sv
+	$(SRC_DIR)/AESDefinitions.sv \
+	$(SRC_DIR)/*.sv
 
 TST_FILES = \
 	$(TST_DIR)/AESTestDefinitions.sv \
@@ -61,8 +61,9 @@ compile:
 ifeq ($(MODE),puresim)
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 else
-	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES)
-        velcomp -top EncoderDecoderTestBench
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
+	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv
+	velcomp -top Transactor
 endif
 	velhvl -sim $(MODE)
 
