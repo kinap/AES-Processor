@@ -13,7 +13,7 @@ roundKeys_t roundKeys;
 state_t tmp;
 
 // Key expansion block - outside the rounds
-ExpandKey keyExpBlock (key, roundKey);
+ExpandKey keyExpBlock (key, roundKeys);
 
 // First round - add key only
 AddRoundKey firstRound(in, roundKeys[0], tmp);
