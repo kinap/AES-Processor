@@ -9,10 +9,10 @@ module AESEncoder(input logic clock, reset,
                  output state_t out);
 
 state_t roundOutput[`NUM_ROUNDS];
-roundKey_t roundKey[`NUM_ROUNDS];
+expandedKey_t roundKey[`NUM_ROUNDS];
 state_t tmp;
 
-// Key expansion block - outside the rounds
+// Key expansion block - generates keys for every round all at once
 ExpandKey keyExpBlock (key, roundKey[0]);
 
 // First round - add key only
@@ -39,7 +39,7 @@ module AESDecoder(input logic clock, reset,
                  output state_t out);
 
 state_t roundOutput[`NUM_ROUNDS];
-roundKey_t roundKey[`NUM_ROUNDS];
+expandedKey_t roundKey[`NUM_ROUNDS];
 state_t tmp;
 
 // Key expansion block - outside the rounds
