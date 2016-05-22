@@ -21,7 +21,6 @@ SRC_DIR ?= src
 TST_DIR ?= test/bench
 HVL_DIR ?= test/hvl
 
-SIM_LOG_FILE ?= sim_log.log
 ERROR_REGEX ?= "Errors: [1-9]\|Warnings: [1-9]"
 BAR_START_LINE = "\n\n\n**********************************************"
 SIM_FAIL = "\n***  Simulation Error/Warning. Check Log.  ***\n"
@@ -30,9 +29,11 @@ BAR_END_LINE = "**********************************************\n\n\n"
 
 COMPILE_CMD = vlog
 COMPILE_FLAGS = -mfcu 
+COMPILE_LOG = compile_log.log
 
 SIMULATE_CMD = vsim
 SIMULATE_FLAGS = -c  -do "run -all"
+SIM_LOG_FILE ?= sim_log.log
 
 SRC_FILES = \
 	$(SRC_DIR)/AESDefinitions.sv \
@@ -53,17 +54,17 @@ endef
 
 compile:
 
-	vlib $(MODE)work
-	vmap work $(MODE)work
-	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f
+	vlib $(MODE)work | tee a $(COMPILE_LOG)
+	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
+	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f | tee -a $(COMPILE_LOG)
 ifeq ($(MODE),puresim)
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
 else
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
-	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv
-	velcomp -top Transactor
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
+	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv | tee -a $(COMPILE_LOG)
+	velcomp -top Transactor | tee -a $(COMPILE_LOG)
 endif
-	velhvl -sim $(MODE)
+	velhvl -sim $(MODE) | tee -a $(COMPILE_LOG)
 
 sim_subbytes:
 	$(SIMULATE_CMD) SubBytesTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
