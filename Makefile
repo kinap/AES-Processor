@@ -92,18 +92,21 @@ sim_encoder_decoder:
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 
 sim_all:
-	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round sim_encoder_decoder \
-		| tee $(SIM_LOG_FILE)
+	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
+			sim_round sim_buffered_round sim_encoder_decoder sim_expandkey \
+			| tee $(SIM_LOG_FILE)
 	$(call check_sim)
 
 all:
 	$(MAKE) clean 
 	
-	for KEY_MACRO in AES_128 AES_192 AES_256 ; do	\
+	for WIDTH in 128 192 256 ; do	\
 		printf "\n$$KEY_MACRO\n" | tee -a $(SIM_LOG_FILE) ; \
-		$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$$KEY_MACRO $(ALL_FILES) ; \
-		$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey sim_round sim_buffered_round |  tee -a $(SIM_LOG_FILE) ; \
-	done
+		$(MAKE) compile KEY_WIDTH=$$WIDTH ; \
+		$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
+				sim_round sim_buffered_round sim_expandkey \
+				| tee -a $(SIM_LOG_FILE) ; \
+				done
 
 	$(call check_sim)
 
