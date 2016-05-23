@@ -7,9 +7,9 @@ import SBox::*;
 
 module ExpandKey(input key_t key, output roundKeys_t roundKeys);
 
-localparam byte_t [KEY_COL_SIZE-1:0] RCON[11] = '{
+localparam byte_t [KEY_COL_SIZE-1:0] RCON[12] = '{
     'h8d, 'h01, 'h02, 'h04, 'h08, 'h10, 
-    'h20, 'h40, 'h80, 'h1b, 'h36
+    'h20, 'h40, 'h80, 'h1b, 'h36, 'h6c
 };
 
 `ifdef AES_256
