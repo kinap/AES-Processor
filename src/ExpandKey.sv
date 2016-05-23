@@ -52,7 +52,7 @@ end
 
 `ifndef AES_256 // expanding a 128- or 192-bit key
 
-    function automatic expandBlock(input integer round, expKeyBlock_t prevBlock);
+    function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
 
         expKeyBlock_t nextBlock;
 
@@ -67,7 +67,7 @@ end
 
 `else // Expanding a 256-bit key
 
-    function automatic expandBlock(input integer round, expKeyBlock_t prevBlock);
+    function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
 
         expKeyBlock_t nextBlock;
 
