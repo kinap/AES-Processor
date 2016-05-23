@@ -10,8 +10,8 @@ parameter CLOCK_WIDTH = CLOCK_CYCLE/2;
 parameter IDLE_CLOCKS = 2;
 
 // Input and Output connections
-logic [127:0] in, inInv, in2, inInv2, out, outInv, out2, outInv2;
-logic [`KEY_SIZE-1:0] key, key2, keyInv2;
+state_t in, inInv, in2, inInv2, out, outInv, out2, outInv2;
+roundKey_t key, key2, keyInv2;
 logic clock, reset;
 
 // Module declaration
@@ -19,8 +19,8 @@ BufferedRound Dut(clock, reset, in, key, out);
 BufferedRoundInverse Dut2(clock, reset, inInv, key, outInv);
 
 // Test last round as a special case
-BufferedRound #(`NUM_ROUNDS) Dut3(clock, reset, in2, key2, out2);
-BufferedRoundInverse #(`NUM_ROUNDS) Dut4(clock, reset, inInv2, keyInv2, outInv2);
+BufferedRound #(`NUM_ROUNDS-1) Dut3(clock, reset, in2, key2, out2);
+BufferedRoundInverse #(`NUM_ROUNDS-1) Dut4(clock, reset, inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;
@@ -92,7 +92,7 @@ begin
     testerFinal.PrintError(in2, key2, out2, expected1, 0);
 
   if(outInv2 !== expected2)
-    testerFinal.PrintError(inInv2, key2, outInv2, expected2, 1);
+    testerFinal.PrintError(inInv2, keyInv2, outInv2, expected2, 1);
 
 end
 

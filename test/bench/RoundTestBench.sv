@@ -7,16 +7,16 @@ import AESTestDefinitions::*;
 module RoundTestBench();
 
 // Input and Output connections
-logic [127:0] in, inInv, in2, inInv2, out, outInv, out2, outInv2;
-logic [`KEY_SIZE-1:0] key, key2, keyInv2;
+state_t in, inInv, in2, inInv2, out, outInv, out2, outInv2;
+roundKey_t key, key2, keyInv2;
 
 // Module declaration
 Round Dut(in, key, out);
 RoundInverse Dut2(inInv, key, outInv);
 
 // Test last round as a special case
-Round #(`NUM_ROUNDS) Dut3(in2, key2, out2);
-RoundInverse #(`NUM_ROUNDS) Dut4(inInv2, keyInv2, outInv2);
+Round #(`NUM_ROUNDS-1) Dut3(in2, key2, out2);
+RoundInverse #(`NUM_ROUNDS-1) Dut4(inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;
@@ -71,7 +71,7 @@ begin
     testerFinal.PrintError(in2, key2, out2, expected1, 0);
 
   if(outInv2 !== expected2)
-    testerFinal.PrintError(inInv2, key2, outInv2, expected2, 1);
+    testerFinal.PrintError(inInv2, keyInv2, outInv2, expected2, 1);
 
 end
 
