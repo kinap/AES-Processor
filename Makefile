@@ -54,7 +54,7 @@ endef
 
 compile:
 
-	vlib $(MODE)work | tee a $(COMPILE_LOG)
+	vlib $(MODE)work | tee $(COMPILE_LOG)
 	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
 	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f | tee -a $(COMPILE_LOG)
 ifeq ($(MODE),puresim)
