@@ -42,16 +42,12 @@ class ScoreBoard;
 
       //Note - this function call is blocking, waits until result is available
       monitor.receive_bytes(1, ne_valid, result, eom_flag);
-      foreach(result[i])
-      begin
-        outEncrypted = {result[i],outEncrypted[0:AES_STATE_SIZE-9]};
-      end
+      
+      outEncrypted = {<<byte{result[0:AES_STATE_SIZE-1]}};
 
       monitor.receive_bytes(1, ne_valid, result, eom_flag);
-      foreach(result[i])
-      begin
-        outDecrypted = {result[i],outDecrypted[0:AES_STATE_SIZE-9]};
-      end
+
+      outDecrypted = {<<byte{result[AES_STATE_SIZE:(2*AES_STATE_SIZE)-1]}};
 
       curTest = sentTests.pop_front();
       expectEncrypted = curTest.encrypt;
