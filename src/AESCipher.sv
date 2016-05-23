@@ -26,7 +26,7 @@ genvar i;
 generate
   for(i = 1; i < `NUM_ROUNDS; i++)
     begin
-      BufferedRound intermediateRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
+      BufferedRound #(i) intermediateRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
       Buffer #(roundKeys_t) intermediateRoundKeys(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
     end
 endgenerate
@@ -58,7 +58,7 @@ genvar i;
 generate
   for(i = 1; i < `NUM_ROUNDS; i++)
     begin
-      BufferedRoundInverse intermediatRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
+      BufferedRoundInverse #(i) intermediatRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
       Buffer #(roundKeys_t) intermediateRoundKeys(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
     end
 endgenerate
