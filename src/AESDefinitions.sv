@@ -22,9 +22,7 @@ package AESDefinitions;
   // Types and sizes for AES
   //
   parameter AES_STATE_SIZE = 16;
-  parameter AES_STATE_NUM_COLS = AES_STATE_SIZE / 4;
   parameter KEY_BYTES = `KEY_SIZE / 8;
-  parameter KEY_COL_SIZE = 4;
 
   // Byte-oriented AES "State"
   // Byte indices 0-3 are the first column, 4-7 are the second column, etc.

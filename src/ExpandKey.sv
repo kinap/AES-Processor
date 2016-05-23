@@ -7,6 +7,8 @@ import SBox::*;
 
 module ExpandKey(input key_t key, output roundKeys_t roundKeys);
 
+localparam KEY_COL_SIZE = 4;
+
 localparam byte_t [KEY_COL_SIZE-1:0] RCON[12] = '{
     'h8d, 'h01, 'h02, 'h04, 'h08, 'h10, 
     'h20, 'h40, 'h80, 'h1b, 'h36, 'h6c
@@ -20,18 +22,17 @@ localparam byte_t [KEY_COL_SIZE-1:0] RCON[12] = '{
     localparam NUM_KEY_EXP_ROUNDS = 11;
 `endif
 
-localparam ROUND_KEY_COLS = (AES_STATE_NUM_COLS*(`NUM_ROUNDS+1));
 localparam KEY_NUM_COLS = KEY_BYTES / KEY_COL_SIZE;
-localparam KEY_SCH_COLS = KEY_NUM_COLS * NUM_KEY_EXP_ROUNDS;
+localparam ROUND_KEY_BITS = AES_STATE_SIZE * 8;
 
 // The algorithm that produces the key schedule operates on blocks that are equal to the key size,
 // but the round keys are always 128 bits. For 192- and 256-bit keys, the algorithm produces a key
 // schedule that is 64 and 128 bits wider than the round keys necessary, respectively. This
 // parameter is calculates the number of bits that the calculated key schedule needs to be shifted
 // right to produce correctly-aligned keys.
-// bit shift = (# of columns in key schedule - total # of round key columns) * # of bytes in a
-// column * 8 bits in a byte
-localparam KEY_SCH_SHIFT = (KEY_SCH_COLS - ROUND_KEY_COLS) * KEY_COL_SIZE * 8;
+// bit shift = (key width * # of expansion rounds + 1) - (round key width * # of cipher rounds +1)
+localparam KEY_SCH_SHIFT = (`KEY_SIZE * (NUM_KEY_EXP_ROUNDS+1)) - 
+                                (ROUND_KEY_BITS * (`NUM_ROUNDS+1));
 
 typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
 typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
