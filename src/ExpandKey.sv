@@ -36,7 +36,7 @@ localparam KEY_SCH_SHIFT = (KEY_SCH_COLS - ROUND_KEY_COLS) * KEY_COL_SIZE * 8;
 typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
 typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
 
-expKeyBlock_t [0:NUM_KEY_EXP_ROUNDS-1] keyBlocks;
+expKeyBlock_t [0:NUM_KEY_EXP_ROUNDS] keyBlocks;
 assign roundKeys = (keyBlocks >> KEY_SCH_SHIFT);
 
 always_comb
