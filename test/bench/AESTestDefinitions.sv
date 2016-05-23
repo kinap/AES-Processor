@@ -302,8 +302,6 @@
         i = $fscanf(file, "%h %h\n", key, roundKeys);
         if (i < 2)
           break;
-        $display("i: %d", i);
-        $display("Key: %h\tRound Keys: %h", key, roundKeys);
 
         AddTestCase(key, roundKeys);
       end 
