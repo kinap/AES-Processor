@@ -54,7 +54,7 @@ TST_FILES = \
 HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 
 SIM_TARGETS = sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
-              sim_round sim_buffered_round sim_encoder_decoder sim_expandkey
+              sim_round sim_buffered_round sim_expandkey sim_encoder_decoder
 
 define check_sim
 	@printf $(BAR_START_LINE);	\
@@ -65,19 +65,17 @@ endef
 
 compile:
 
+	vlib $(MODE)work | tee $(COMPILE_LOG)
+	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
+
 ifeq ($(MODE),standard) # Compiling in standard mode: no Veloce dependencies
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) | tee $(COMPILE_LOG)
 
 else # Compiling either for Veloce, or Veloce puresim
-	vlib $(MODE)work | tee $(COMPILE_LOG)
-	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
 	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f | tee -a $(COMPILE_LOG)
-
-ifeq ($(MODE),puresim) # Compiling for puresim
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
 
-else # Compiling for Veloce
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
+ifeq ($(MODE),veloce) # Compiling for puresim
 	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv | tee -a $(COMPILE_LOG)
 	velcomp -top Transactor | tee -a $(COMPILE_LOG)
 
@@ -113,10 +111,6 @@ ifeq ($(MODE),standard)
 else
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 endif
-
-sim_all:
-	$(MAKE) $(SIM_TARGETS) | tee $(SIM_LOG_FILE)
-	$(call check_sim)
 
 all:
 	$(MAKE) clean 
