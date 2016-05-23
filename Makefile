@@ -111,7 +111,8 @@ all:
 
 clean:
 	rm -rf work transcript $(SIM_LOG_FILE) 
-	rm -rf velocework puresimwork veloce.log veloce.med veloce.map
+	rm -rf velocework puresimwork veloce.log veloce.med veloce.map tbxbindings.h 
+	rm -rf velrunopts.ini modelsim.ini
 
 # Commenting out original makefile - we'll want to keep it for reference later
 #
