@@ -23,6 +23,7 @@ class ScoreBoard;
   key_t key;
   state_t outEncrypted, outDecrypted,
           expectEncrypted, expectDecrypted;
+  logic [3:0] encryptValid, decryptValid;
   inputTest_t curTest;
 
   scemi_dynamic_output_pipe monitor;
@@ -38,42 +39,49 @@ class ScoreBoard;
     bit [1:0] ne_valid;
     while(1)
     begin
-      automatic byte unsigned result[] = new[2*AES_STATE_SIZE];
+      automatic byte unsigned result[] = new[2*AES_STATE_SIZE+1];
 
       //Note - this function call is blocking, waits until result is available
       monitor.receive_bytes(1, ne_valid, result, eom_flag);
       
       outEncrypted = {<<byte{result[0:AES_STATE_SIZE-1]}};
+      encryptValid = result[2*AES_STATE_SIZE][7:4];
 
-      monitor.receive_bytes(1, ne_valid, result, eom_flag);
+      //Don't think the second recieve is needed.
+      //monitor.receive_bytes(1, ne_valid, result, eom_flag);
 
       outDecrypted = {<<byte{result[AES_STATE_SIZE:(2*AES_STATE_SIZE)-1]}};
+      decryptValid = result[2*AES_STATE_SIZE][3:0];
 
-      curTest = sentTests.pop_front();
-      expectEncrypted = curTest.encrypt;
-      expectDecrypted = curTest.plain;
-
-      //$display("outEncrypted: %h", outEncrypted);
-      //$display("outDecrypted: %h", outDecrypted);
-
-      if(outEncrypted !== expectEncrypted)
+      if(encryptValid == 4'b1 && decryptValid == 4'b1)
       begin
-        $display("***Error: Encrypted output doesn't match expected");
-        $display("***       Encrypted output: %h", outEncrypted);
-        $display("***       Expected:         %h", expectEncrypted);
-        errorCount++;
+        curTest = sentTests.pop_front();
+        expectEncrypted = curTest.encrypt;
+        expectDecrypted = curTest.plain;
+
+        //$display("outEncrypted: %h", outEncrypted);
+        //$display("outDecrypted: %h", outDecrypted);
+
+        if(outEncrypted !== expectEncrypted)
+        begin
+          $display("***Error: Encrypted output doesn't match expected");
+          $display("***       Encrypted output: %h", outEncrypted);
+          $display("***       Expected:         %h", expectEncrypted);
+          errorCount++;
+        end
+
+        if(outDecrypted !== expectDecrypted)
+        begin
+          $display("***Error: Decrypted output doesn't match expected");
+          $display("***       Decrypted output: %h", outDecrypted);
+          $display("***       Expected:         %h", expectDecrypted);
+          errorCount++;
+        end
       end
 
-      if(outDecrypted !== expectDecrypted)
-      begin
-        $display("***Error: Decrypted output doesn't match expected");
-        $display("***       Decrypted output: %h", outDecrypted);
-        $display("***       Expected:         %h", expectDecrypted);
-        errorCount++;
-      end
- 
       if(eom_flag && (sentTests.size() == 0))
           $finish;
+
     end
   endtask : run
 
@@ -88,7 +96,7 @@ class StimulusGeneration;
   state_t inData, expected;
   key_t keyData;
   inputTest_t test;
-  int i;
+  int i, j, k;
 
   function new();
   begin
@@ -96,13 +104,6 @@ class StimulusGeneration;
     plain_file = $fopen("test/vectors/plain.txt", "rb");
     encrypted_file = $fopen("test/vectors/encrypted.txt", "rb");
     key_file = $fopen("test/vectors/key.txt", "rb");
-    
-    // Push enough "dummy" tests to allow the encoder/decoder to output real data
-    for(int j = 0; j <= `NUM_ROUNDS; j++)
-    begin
-      test = '0;
-      sentTests.push_back(test);
-    end
   end
   endfunction : new
 
@@ -113,10 +114,14 @@ class StimulusGeneration;
       // Read in plain and encrypted data and key
       i = $fscanf(plain_file, "%h", inData);
       //$display("%m, inData: %h", inData);
-      i = $fscanf(encrypted_file, "%h", expected);
+      j = $fscanf(encrypted_file, "%h", expected);
       //$display("%m, expected: %h", expected);
-      i = $fscanf(key_file, "%h", keyData);
+      k = $fscanf(key_file, "%h", keyData);
       //$display("%m, key: %h", keyData);
+
+      //Check if data is read in
+      if(i <= 0 && j <= 0 && k <= 0)
+        continue;
       
       // Create a test and push it to the queue
       test.plain = inData;

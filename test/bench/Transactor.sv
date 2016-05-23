@@ -33,9 +33,10 @@ end
 // DUT Instantiation
 key_t inputKey;
 state_t plainData, encryptData, outputEncrypt, outputPlain;
+logic encodeValid, decodeValid;
 
-AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt);
-AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain);
+AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt, encodeValid);
+AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeVaiid);
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
@@ -44,8 +45,8 @@ scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
                   ) inputpipe(clock);
 
 // Output Pipe Instantiation
-scemi_output_pipe #(.BYTES_PER_ELEMENT(AES_STATE_SIZE),
-                    .PAYLOAD_MAX_ELEMENTS(2),
+scemi_output_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+1),
+                    .PAYLOAD_MAX_ELEMENTS(1),
                     .BUFFER_MAX_ELEMENTS(100)
                   ) outputpipe(clock);
 
@@ -67,8 +68,8 @@ begin
   begin
     //$display("outputEncrypt: %h", outputEncrypt);
     //$display("outputPlain: %h", outputPlain);
-    testOut = {outputEncrypt, outputPlain};
-    outputpipe.send(2,testOut,eom);
+    testOut = {outputEncrypt, outputPlain, {3'b0, encodeValid}, {3'b0, decodeValid}};
+    outputpipe.send(1,testOut,eom);
 
     if(!eom)
     begin
