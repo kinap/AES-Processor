@@ -7,14 +7,15 @@ import AESTestDefinitions::*;
 module AddRoundKeyTestBench();
 
 // Input and Output connections
-logic [127:0] in, out, key;
+state_t in, out;
+roundKey_t key;
 
 // Module declaration
 AddRoundKey Dut(in, key, out);
 
 // Test exectuion and verfication task
 keyTest_t curTest;
-bit [127:0] curOut;
+state_t curOut;
 
 initial
 begin

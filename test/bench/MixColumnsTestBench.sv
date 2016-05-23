@@ -7,7 +7,7 @@ import AESTestDefinitions::*;
 module MixColumnsTestBench();
 
 // Input and Output connections
-logic [127:0] in, inInv, out, outInv;
+state_t in, inInv, out, outInv;
 
 // Module declaration
 MixColumns Dut(in, out);
@@ -15,7 +15,7 @@ MixColumnsInverse Dut2(inInv, outInv);
 
 // Test exectuion and verfication task
 test_t curTest;
-bit [127:0] curOut, curOutInv;
+state_t curOut, curOutInv;
 
 initial
 begin
