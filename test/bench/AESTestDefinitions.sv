@@ -255,20 +255,8 @@
 
     function void Compare(expandedKeyTest_t curTest, roundKeys_t roundKeys);
 
-      `ifdef VERBOSE
-        $display("***   Key Size:\t%d", `KEY_SIZE);
-        $display("*** Num Rounds:\t%d", `NUM_ROUNDS);
-        $display("*** Cipher Key:\t%h", curTest.key);
-      `endif
-
       for (int i=0; i<=`NUM_ROUNDS; ++i)
       begin
-
-        `ifdef VERBOSE
-          $display("***      Round:\t%0d", i);
-          $display("***   Expected:\t%h", curTest.roundKeys[i]);
-          $display("***     Actual:\t%h", roundKeys[i]);
-        `endif
           
         if(curTest.roundKeys[i] !== roundKeys[i])
         begin

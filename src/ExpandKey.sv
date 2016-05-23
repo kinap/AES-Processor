@@ -89,7 +89,7 @@ end
 
 function automatic expKeyColumn_t ApplyRcon(input integer round, expKeyColumn_t in);
 
-    return in ^ (RCON[round] << (KEY_COL_SIZE-1));
+    return in ^ (RCON[round] << ((KEY_COL_SIZE-1)*8));
 
 endfunction
 
