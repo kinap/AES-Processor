@@ -3,6 +3,7 @@
 # ECE 571 SP2016
 #
 
+#MODE ?= standard
 MODE ?= puresim
 #MODE ?= veloce
 
@@ -32,7 +33,14 @@ COMPILE_FLAGS = -mfcu
 COMPILE_LOG = compile_log.log
 
 SIMULATE_CMD = vsim
+
+ifeq ($(MODE),standard)
 SIMULATE_FLAGS = -c  -do "run -all"
+else
+SIMULATE_FLAGS = -c  -do "run -all" +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+SIMULATE_MANAGER = TbxSvManager 
+endif
+
 SIM_LOG_FILE ?= sim_log.log
 
 SRC_FILES = \
@@ -45,6 +53,9 @@ TST_FILES = \
 
 HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 
+SIM_TARGETS = sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
+              sim_round sim_buffered_round sim_encoder_decoder sim_expandkey
+
 define check_sim
 	@printf $(BAR_START_LINE);	\
 	grep $(ERROR_REGEX) $(SIM_LOG_FILE) > /dev/null;  \
@@ -54,46 +65,57 @@ endef
 
 compile:
 
+ifeq ($(MODE),standard) # Compiling in standard mode: no Veloce dependencies
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) | tee $(COMPILE_LOG)
+
+else # Compiling either for Veloce, or Veloce puresim
 	vlib $(MODE)work | tee $(COMPILE_LOG)
 	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
 	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f | tee -a $(COMPILE_LOG)
-ifeq ($(MODE),puresim)
+
+ifeq ($(MODE),puresim) # Compiling for puresim
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
-else
+
+else # Compiling for Veloce
 	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
 	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv | tee -a $(COMPILE_LOG)
 	velcomp -top Transactor | tee -a $(COMPILE_LOG)
-endif
+
+endif # Compiling either for Veloce or Veloce puresim
 	velhvl -sim $(MODE) | tee -a $(COMPILE_LOG)
 
+endif
+
 sim_subbytes:
-	$(SIMULATE_CMD) SubBytesTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS) 
 
 sim_shiftrows:
-	$(SIMULATE_CMD) ShiftRowsTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) ShiftRowsTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS) 
 
 sim_mixcolumns:
-	$(SIMULATE_CMD) MixColumnsTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) MixColumnsTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_addroundkey:
-	$(SIMULATE_CMD) AddRoundKeyTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) AddRoundKeyTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_round:
-	$(SIMULATE_CMD) RoundTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) RoundTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_buffered_round:
-	$(SIMULATE_CMD) BufferedRoundTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_expandkey:
-	$(SIMULATE_CMD) ExpandKeyTestBench TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_encoder_decoder:
-	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor TbxSvManager $(SIMULATE_FLAGS) +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
+ifeq ($(MODE),standard)
+	$(SIMULATE_CMD) EncoderDecoderTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
+else
+	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
+endif
 
 sim_all:
-	$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
-			sim_round sim_buffered_round sim_encoder_decoder sim_expandkey \
-			| tee $(SIM_LOG_FILE)
+	$(MAKE) $(SIM_TARGETS) | tee $(SIM_LOG_FILE)
 	$(call check_sim)
 
 all:
@@ -102,10 +124,7 @@ all:
 	for WIDTH in 128 192 256 ; do	\
 		printf "\n$$KEY_MACRO\n" | tee -a $(SIM_LOG_FILE) ; \
 		$(MAKE) compile KEY_WIDTH=$$WIDTH ; \
-		$(MAKE) sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
-				sim_round sim_buffered_round sim_expandkey \
-				| tee -a $(SIM_LOG_FILE) ; \
-				done
+		$(MAKE) $(SIM_TARGETS) | tee -a $(SIM_LOG_FILE) ; done
 
 	$(call check_sim)
 
