@@ -24,16 +24,14 @@ Buffer #(roundKeys_t) firstRoundKeyBuffer(clock, reset, roundKeys, roundKeyOutpu
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
 generate
-  for(i = 1; i < `NUM_ROUNDS-1; i++)
+  for(i = 1; i < `NUM_ROUNDS; i++)
     begin
       BufferedRound intermediateRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
       Buffer #(roundKeys_t) intermediateRoundKeys(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
     end
 endgenerate
 
-// Final round - sub, shift, add key
-BufferedRound finalRound(clock, reset, roundOutput[`NUM_ROUNDS-1], roundKeyOutput[`NUM_ROUNDS-1][`NUM_ROUNDS-1], out);
-Buffer #(roundKeys_t) finalRoundKeys(clock, reset, roundKeyOutput[`NUM_ROUNDS-2], roundKeyOutput[`NUM_ROUNDS-1]);
+assign out = roundOutput[`NUM_ROUNDS-1];
 
 endmodule : AESEncoder
 
@@ -58,7 +56,7 @@ Buffer #(roundKeys_t) firstRoundKeyBuffer(clock, reset, roundKeys, roundKeyOutpu
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
 generate
-  for(i = 1; i < `NUM_ROUNDS-1; i++)
+  for(i = 1; i < `NUM_ROUNDS; i++)
     begin
       BufferedRoundInverse intermediatRound(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i-1], roundOutput[i]);
       Buffer #(roundKeys_t) intermediateRoundKeys(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
@@ -66,7 +64,6 @@ generate
 endgenerate
 
 // Final round - sub, shift, add key
-BufferedRoundInverse finalRound(clock, reset, roundOutput[`NUM_ROUNDS-1], roundKeyOutput[`NUM_ROUNDS-1][`NUM_ROUNDS-1], out);
-Buffer #(roundKeys_t) finalRoundKeys(clock, reset, roundKeyOutput[`NUM_ROUNDS-2], roundKeyOutput[`NUM_ROUNDS-1]);
+assign out = roundOutput[`NUM_ROUNDS-1];
 
 endmodule : AESDecoder
