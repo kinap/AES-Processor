@@ -106,9 +106,7 @@ sim_expandkey:
 	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_encoder_decoder:
-ifeq ($(MODE),standard)
-	#$(SIMULATE_CMD) EncoderDecoderTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
-else
+ifneq ($(MODE),standard)
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 endif
 
