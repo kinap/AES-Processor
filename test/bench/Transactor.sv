@@ -36,7 +36,7 @@ state_t plainData, encryptData, outputEncrypt, outputPlain;
 logic encodeValid, decodeValid;
 
 AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt, encodeValid);
-AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeVaiid);
+AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeValid);
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),

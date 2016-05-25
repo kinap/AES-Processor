@@ -6,10 +6,14 @@ import AESDefinitions::*;
 
 module AESEncoder(input logic clock, reset,
                   input state_t in, key_t key,
-                 output state_t out);
+                 output state_t out,
+                 output encodeValid);
 
 state_t roundOutput[`NUM_ROUNDS+1];
 roundKeys_t roundKeyOutput[`NUM_ROUNDS+1];
+
+// counter for valid signal
+Counter validCounter(clock, reset, encodeValid);
 
 // Key expansion block - outside the rounds
 ExpandKey keyExpBlock (key, roundKeyOutput[0]);
@@ -34,10 +38,14 @@ endmodule : AESEncoder
 
 module AESDecoder(input logic clock, reset,
                   input state_t in, key_t key,
-                 output state_t out);
+                 output state_t out,
+                 output decodeValid);
 
 state_t roundOutput[`NUM_ROUNDS+1];
 roundKeys_t roundKeyOutput[`NUM_ROUNDS+1];
+
+// counter for valid signal
+Counter validCounter(clock, reset, decodeValid);
 
 // Key expansion block - outside the rounds
 ExpandKey keyExpBlock (key, roundKeyOutput[0]);
