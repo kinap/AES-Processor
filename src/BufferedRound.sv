@@ -8,7 +8,6 @@ module BufferedRound(input logic clock, reset,
                      input state_t in, roundKey_t key,
                      output state_t out);
 parameter RoundNum = 1;
-localparam finalRound = ((RoundNum == `NUM_ROUNDS-1) ? 1 : 0);
 
 // State wire for intermediate value
 state_t temp;
@@ -22,7 +21,6 @@ module BufferedRoundInverse(input logic clock, reset,
                             input state_t in, roundKey_t key,
                             output state_t out);
 parameter RoundNum = 1;
-localparam finalRound = ((RoundNum == `NUM_ROUNDS-1) ? 1 : 0);
 
 // State wire for intermediate value
 state_t temp;
