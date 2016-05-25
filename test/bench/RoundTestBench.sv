@@ -15,8 +15,8 @@ Round Dut(in, key, out);
 RoundInverse Dut2(inInv, key, outInv);
 
 // Test last round as a special case
-Round #(`NUM_ROUNDS-1) Dut3(in2, key2, out2);
-RoundInverse #(`NUM_ROUNDS-1) Dut4(inInv2, keyInv2, outInv2);
+Round #(`NUM_ROUNDS) Dut3(in2, key2, out2);
+RoundInverse #(`NUM_ROUNDS) Dut4(inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;

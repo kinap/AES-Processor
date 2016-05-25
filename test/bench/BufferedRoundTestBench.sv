@@ -19,8 +19,8 @@ BufferedRound Dut(clock, reset, in, key, out);
 BufferedRoundInverse Dut2(clock, reset, inInv, key, outInv);
 
 // Test last round as a special case
-BufferedRound #(`NUM_ROUNDS-1) Dut3(clock, reset, in2, key2, out2);
-BufferedRoundInverse #(`NUM_ROUNDS-1) Dut4(clock, reset, inInv2, keyInv2, outInv2);
+BufferedRound #(`NUM_ROUNDS) Dut3(clock, reset, in2, key2, out2);
+BufferedRoundInverse #(`NUM_ROUNDS) Dut4(clock, reset, inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;
