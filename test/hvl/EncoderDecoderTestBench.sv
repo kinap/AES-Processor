@@ -102,12 +102,40 @@ class StimulusGeneration;
   inputTest_t test;
   int i, j, k;
 
+  string plainFN, encryptFN, keyFN;
+  /*`ifdef AES_192
+    plainFN = "test/vectors/plain_192.txt";
+    encryptFN = "test/vectors/encrypted_192.txt";
+    keyFN = "test/vectors/key_192.txt";
+  `elsif AES_256
+    plainFN = "test/vectors/plain_256.txt";
+    encryptFN = "test/vectors/encrypted_256.txt";
+    keyFN = "test/vectors/key_256.txt";
+  `else
+    plainFN = "test/vectors/plain.txt";
+    encryptFN = "test/vectors/encrypted.txt";
+    keyFN = "test/vectors/key.txt";
+  `endif*/
+
   function new();
   begin
     driver = new("Transactor.inputpipe");
-    plain_file = $fopen("test/vectors/plain.txt", "rb");
-    encrypted_file = $fopen("test/vectors/encrypted.txt", "rb");
-    key_file = $fopen("test/vectors/key.txt", "rb");
+    `ifdef AES_192
+      plainFN = "test/vectors/plain_192.txt";
+      encryptFN = "test/vectors/encrypted_192.txt";
+      keyFN = "test/vectors/key_192.txt";
+    `elsif AES_256
+      plainFN = "test/vectors/plain_256.txt";
+      encryptFN = "test/vectors/encrypted_256.txt";
+      keyFN = "test/vectors/key_256.txt";
+    `else
+      plainFN = "test/vectors/plain.txt";
+      encryptFN = "test/vectors/encrypted.txt";
+      keyFN = "test/vectors/key.txt";
+    `endif
+    plain_file = $fopen(plainFN, "rb");
+    encrypted_file = $fopen(encryptFN, "rb");
+    key_file = $fopen(keyFN, "rb");
   end
   endfunction : new
 
