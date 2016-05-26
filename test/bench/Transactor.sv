@@ -10,6 +10,13 @@ typedef struct packed {
   key_t key;
 } inputTest_t;
 
+typedef struct packed {
+  state_t encrypt;
+  state_t plain;
+  logic [3:0] encryptValid;
+  logic [3:0] plainVlaid;
+} outputResult_t;
+
 module Transactor;
 
 // Clock generation
@@ -52,7 +59,7 @@ scemi_output_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+1),
 
 //XRTL FSM to obtain operands from the HVL side
 inputTest_t testIn;
-state_t [1:0] testOut;
+outputResult_t testOut;
 bit eom = 0;
 logic [7:0] ne_valid = 0;
 
@@ -66,8 +73,6 @@ begin
   end
   else
   begin
-    //$display("outputEncrypt: %h", outputEncrypt);
-    //$display("outputPlain: %h", outputPlain);
     testOut = {outputEncrypt, outputPlain, {3'b0, encodeValid}, {3'b0, decodeValid}};
     outputpipe.send(1,testOut,eom);
 
@@ -75,13 +80,9 @@ begin
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
       testIn = {<<byte{testIn}};
-      //$display("testIn: %h", testIn);
       plainData <= testIn.plain;
-      //$display("plain: %h", testIn.plain);
       encryptData <= testIn.encrypt;
-      //$display("encrypt: %h", testIn.encrypt);
       inputKey <= testIn.key;
-      //$display("key: %h", testIn.key);
     end
   end
 end

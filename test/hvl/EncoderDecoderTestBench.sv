@@ -14,7 +14,7 @@ int key_file;
 
 // Store sent data and expected encrypted output in a queue;
 inputTest_t sentTests [$];
-int errorCount = 0;
+int errorCount = 0, passCount = 0;
 
 // Scoreboard class
 // Monitors output pipe, compare to golden result
@@ -43,24 +43,20 @@ class ScoreBoard;
 
       //Note - this function call is blocking, waits until result is available
       monitor.receive_bytes(1, ne_valid, result, eom_flag);
-      
-      outEncrypted = {<<byte{result[0:AES_STATE_SIZE-1]}};
-      encryptValid = result[2*AES_STATE_SIZE][7:4];
+
+      outDecrypted = {<<byte{result[1:AES_STATE_SIZE]}};
+      decryptValid = result[0][3:0];
 
       //Don't think the second recieve is needed.
-      //monitor.receive_bytes(1, ne_valid, result, eom_flag);
 
-      outDecrypted = {<<byte{result[AES_STATE_SIZE:(2*AES_STATE_SIZE)-1]}};
-      decryptValid = result[2*AES_STATE_SIZE][3:0];
+      outEncrypted = {<<byte{result[AES_STATE_SIZE+1:(2*AES_STATE_SIZE)]}};
+      encryptValid = result[0][7:4];
 
       if(encryptValid == 4'b1 && decryptValid == 4'b1)
       begin
         curTest = sentTests.pop_front();
         expectEncrypted = curTest.encrypt;
         expectDecrypted = curTest.plain;
-
-        //$display("outEncrypted: %h", outEncrypted);
-        //$display("outDecrypted: %h", outDecrypted);
 
         if(outEncrypted !== expectEncrypted)
         begin
@@ -69,6 +65,10 @@ class ScoreBoard;
           $display("***       Expected:         %h", expectEncrypted);
           errorCount++;
         end
+        else
+        begin
+          passCount++;
+        end
 
         if(outDecrypted !== expectDecrypted)
         begin
@@ -76,6 +76,10 @@ class ScoreBoard;
           $display("***       Decrypted output: %h", outDecrypted);
           $display("***       Expected:         %h", expectDecrypted);
           errorCount++;
+        end
+        else
+        begin
+          passCount++;
         end
       end
 
@@ -113,11 +117,8 @@ class StimulusGeneration;
     begin
       // Read in plain and encrypted data and key
       i = $fscanf(plain_file, "%h", inData);
-      //$display("%m, inData: %h", inData);
       j = $fscanf(encrypted_file, "%h", expected);
-      //$display("%m, expected: %h", expected);
       k = $fscanf(key_file, "%h", keyData);
-      //$display("%m, key: %h", keyData);
 
       //Check if data is read in
       if(i <= 0 && j <= 0 && k <= 0)
@@ -129,14 +130,12 @@ class StimulusGeneration;
       test.key = keyData;
       sentTests.push_back(test);
       
-      //$display("%m, %h", test);
       // Convert the data to an array to send
       foreach(dataSend[i])
       begin
         dataSend[i] = test[$bits(test)-1:$bits(test)-8];
         test = {test, 8'b0};
       end
-      //$display("%m, %h", dataSend);
 
       driver.send_bytes(1, dataSend, 0);
     end
@@ -183,7 +182,7 @@ module EncoderDecoderTestBench;
   begin
     $display("\nEnded at:"); $system("date");
     if(!errorCount)
-      $display("All tests pass sucessfully");
+      $display("%0d tests passed sucessfully", passCount);
     else
       $display("%0d tests failed", errorCount);
   end
