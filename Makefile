@@ -22,12 +22,6 @@ SRC_DIR ?= src
 TST_DIR ?= test/bench
 HVL_DIR ?= test/hvl
 
-ERROR_REGEX ?= "Errors: [1-9]\|Warnings: [1-9]"
-BAR_START_LINE = "\n\n\n**********************************************"
-SIM_FAIL = "\n***  Simulation Error/Warning. Check Log.  ***\n"
-SIM_PASS = "\n*** Simulation completed without failures. ***\n"
-BAR_END_LINE = "**********************************************\n\n\n"
-
 COMPILE_CMD = vlog
 COMPILE_FLAGS = -mfcu 
 COMPILE_LOG = compile_log.log
@@ -41,7 +35,7 @@ SIMULATE_FLAGS = -c  -do "run -all" +tbxrun+"$(QUESTA_RUNTIME_OPTS)"
 SIMULATE_MANAGER = TbxSvManager 
 endif
 
-SIM_LOG ?= sim_log.log
+ALL_LOG ?= all.log
 
 SRC_FILES = \
 	$(SRC_DIR)/AESDefinitions.sv \
@@ -56,31 +50,24 @@ HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 SIM_TARGETS = sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
               sim_round sim_buffered_round sim_expandkey sim_encoder_decoder
 
-define check_sim
-	@printf $(BAR_START_LINE);	\
-	grep $(ERROR_REGEX) $(SIM_LOG) > /dev/null;  \
-               if [ $$? -eq 0 ]; then printf $(SIM_FAIL); else printf $(SIM_PASS); fi; \
-	printf $(BAR_END_LINE)
-endef
-
 compile:
 
-	vlib $(MODE)work | tee $(COMPILE_LOG)
-	vmap work $(MODE)work | tee -a $(COMPILE_LOG)
+	vlib $(MODE)work
+	vmap work $(MODE)work
 
 ifeq ($(MODE),standard) # Compiling in standard mode: no Veloce dependencies
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) | tee $(COMPILE_LOG)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES)
 
 else # Compiling either for Veloce, or Veloce puresim
-	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f | tee -a $(COMPILE_LOG)
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES) | tee -a $(COMPILE_LOG)
+	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f
+	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 
 ifeq ($(MODE),veloce) # Compiling for puresim
-	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv | tee -a $(COMPILE_LOG)
-	velcomp -top Transactor | tee -a $(COMPILE_LOG)
+	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv
+	velcomp -top Transactor
 
 endif # Compiling either for Veloce or Veloce puresim
-	velhvl -sim $(MODE) | tee -a $(COMPILE_LOG)
+	velhvl -sim $(MODE)
 
 endif
 
@@ -110,18 +97,35 @@ ifneq ($(MODE),standard)
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 endif
 
+define check_log
+       @grep $(1) $(ALL_LOG) > /dev/null;  \
+               if [ $$? -eq 0 ]; then printf $(2); else printf $(3); fi;
+endef
+PRINT_BAR = "\n***********************************************"
+
 all:
 	$(MAKE) clean 
 	
-	for WIDTH in 128 192 256 ; do	\
-		printf "\n$$KEY_MACRO\n" | tee -a $(SIM_LOG) ; \
-		$(MAKE) compile KEY_WIDTH=$$WIDTH ; \
-		$(MAKE) $(SIM_TARGETS) | tee -a $(SIM_LOG) ; done
+	@for WIDTH in 128 192 256 ; do	\
+		printf $(PRINT_BAR) | tee -a $(ALL_LOG); \
+		printf "\n\tAES-$$WIDTH" | tee -a $(ALL_LOG) ; \
+		printf $(PRINT_BAR) | tee -a $(ALL_LOG); \
+		printf "\n" | tee -a $(ALL_LOG); \
+		$(MAKE) compile KEY_WIDTH=$$WIDTH | tee -a $(ALL_LOG) ; \
+		$(MAKE) $(SIM_TARGETS) | tee -a $(ALL_LOG) ; done
 
-	$(call check_sim)
+	@printf "\n\n"
+	@printf $(PRINT_BAR)
+	@printf "\nLog file: $(ALL_LOG)\n"
+	$(call check_log,"Errors: [1-9]","\nExecution Errors:\tYES","\nExecution Errors:\tNo")
+	$(call check_log,"Assertion error","\nAssertion Errors:\tYES","\nAssertion Errors:\tNo")
+	$(call check_log,"Warnings: [1-9]","\nWarnings:\t\tYES","\nWarnings:\t\tNo")
+	@printf $(PRINT_BAR)
+	@printf "\n\n"
+
 
 clean:
-	rm -rf work transcript $(SIM_LOG) $(COMPILE_LOG)
+	rm -rf work transcript $(ALL_LOG)
 	rm -rf velocework puresimwork standardwork veloce.log veloce.med veloce.map tbxbindings.h 
 	rm -rf velrunopts.ini modelsim.ini
 

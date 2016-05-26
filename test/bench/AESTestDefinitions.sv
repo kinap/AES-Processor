@@ -42,7 +42,8 @@
     endfunction : NumTests
 
     function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
-      if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
+      ShiftRows_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
+      else
       begin
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
@@ -52,7 +53,7 @@
         $display("***        Input:    %h", (encryptedIn ? curTest.encrypted : curTest.plain));
         $display("***        Output:   %h", out);
         $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
-        $finish();
+        $error;
       end
     endfunction : Compare
 
@@ -101,7 +102,8 @@
     endfunction : NumTests
 
     function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
-      if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
+      AddRoundKey_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
+      else
       begin
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
@@ -112,7 +114,7 @@
         $display("***        Key:      %h", curTest.roundKey);
         $display("***        Output:   %h", out);
         $display("***        Expected: %h", (encryptedIn ? curTest.plain : curTest.encrypted));
-        $finish();
+        $error;
       end
     endfunction : Compare
 
@@ -158,10 +160,14 @@
     endfunction : NumTests
 
     function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
-      if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
+      Round_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
+      else
       begin
-        PrintError((encryptedIn ? curTest.encrypted : curTest.plain), curTest.roundKey, out, (encryptedIn ? curTest.plain : curTest.encrypted), encryptedIn);
-        $finish();
+        PrintError((encryptedIn ? curTest.encrypted : curTest.plain), 
+                curTest.roundKey, out, 
+                (encryptedIn ? curTest.plain : curTest.encrypted), 
+                encryptedIn);
+        $error;
       end
     endfunction : Compare
 
@@ -244,14 +250,15 @@
       for (int i=0; i<=`NUM_ROUNDS; ++i)
       begin
           
-        if(curTest.roundKeys[i] !== roundKeys[i])
+        KeySchedule_a: assert (curTest.roundKeys[i] == roundKeys[i])
+        else
         begin
           $display("***      Error: Round key doesn't match expected");
           $display("***      Round:\t%0d", i);
           $display("*** Cipher Key:\t%h", curTest.key);
           $display("***   Expected:\t%h", curTest.roundKeys[i]);
           $display("***     Actual:\t%h", roundKeys[i]);
-          $finish();
+          $error;
         end
 
       end
