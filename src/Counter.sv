@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module Counter #(parameter WIDTH = 8, RESET_VAL = `NUM_ROUNDS+1)
+module Counter #(parameter WIDTH = 8, RESET_VAL = `NUM_ROUNDS)
                 (input clock, reset,
                 output logic timeUp);
 
