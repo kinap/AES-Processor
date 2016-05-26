@@ -2,30 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <tomcrypt.h>
-
-//TODO figure out a way to use a common header with SV?
-
-#define BLOCKSIZE 16
-#define PT_FILENAME "plain.txt"
-#define CT_FILENAME "encrypted.txt"
-#define KEY_FILENAME "key.txt"
-
-#ifdef AES_256
-    #define KEYLEN 32
-    #define NUM_ROUNDS 14
-#elif AES_192
-    #define KEYLEN 24
-    #define NUM_ROUNDS 12
-#else // AES_128
-    #define KEYLEN 16
-    #define NUM_ROUNDS 10
-#endif
-
-struct file_h {
-    FILE *pt_file;
-    FILE *ct_file;
-    FILE *key_file;
-} handle;
+#include "AESGen.h"
 
 //
 // Utilities
@@ -53,7 +30,7 @@ void print_block(unsigned char *arr, int len)
 }
 
 //
-// Known Answer Test. Used to verify that the libtomcrypt sequence produces correct results.
+// Known Answer Test. Verifies that the libtomcrypt sequence produces correct results.
 // 
 int kat(void)
 {
@@ -128,8 +105,8 @@ int generate_vector(struct file_h *handle, prng_state *prng)
 
     /* Generate random data */
     yarrow_read(pt, sizeof(pt), prng);
-    yarrow_read(ct, sizeof(ct), prng);
     yarrow_read(key, sizeof(key), prng);
+    // 0 ct    
 
     /* setup variant */
     aes_setup(key, KEYLEN, NUM_ROUNDS, &skey);
@@ -162,12 +139,13 @@ int generate_vector(struct file_h *handle, prng_state *prng)
 int main(int argc, char **argv)
 {
     int i;
-    const char *seed = "Beer! It's what's for breakfast.";
-    char verify_generator = atoi(argv[1]);
-    int count = atoi(argv[2]);
     struct file_h handle;
     prng_state prng;
-    // TODO use proper argparse
+
+    struct arguments args;
+    argp_parse(&argp, argc, argv, 0, 0, &args);
+
+    /* Default arg values */
 
     /* register AES */
     if (register_cipher(&aes_desc)) {
@@ -175,26 +153,23 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    printf("hey\n");
     /* start psuedo random number generator */
     if (yarrow_start(&prng) != CRYPT_OK) {
         printf("Error starting PRNG.\n");
         return EXIT_FAILURE;
     }
-    printf("hey\n");
-    printf("hey\n");
+
     if (yarrow_ready(&prng) != CRYPT_OK) {
         printf("Error readying.\n");
         return EXIT_FAILURE;
     }
-    printf("hey\n");
 
     /* generate test vectors */
-    if (verify_generator) {
+    if (args.kat) {
         kat();
     } else {
         open_files(&handle);
-        for (i = 0; i < count; i++) 
+        for (i = 0; i < args.num_vectors; i++) 
             // TODO segault - compile with tomfastmath?
             //if (yarrow_add_entropy(seed, sizeof(seed), &prng) != CRYPT_OK) {
             //    printf("Error adding entropy.\n");
