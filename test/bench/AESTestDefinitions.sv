@@ -1,11 +1,6 @@
 `ifndef AES_TEST_DEFINITIONS
   `define AES_TEST_DEFINITIONS
 
-  // TODO: Remove AES_SIM_ERROR, replace $finish in error detection to $error
-
-  // TODO: Identify methods that are shared between all test classes (like
-  // GetNextTest and NumTests) and move them into a test superclass
-
   package AESTestDefinitions;
 
   import AESDefinitions::*;
@@ -26,12 +21,6 @@
     key_t key;
     roundKeys_t roundKeys;
   } expandedKeyTest_t;
-
-/*  typedef struct packed {
-    state_t plain;
-    state_t encrypt;
-    key_t key;
-  } inputTest_t; */
 
   //***************************************************************************************//
   class UnitTester;
@@ -55,7 +44,6 @@
     function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
       if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
       begin
-        $display("AES_SIM_ERROR");
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
           $display("***        Inverse Phase");
@@ -115,7 +103,6 @@
     function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
       if(out !== (encryptedIn ? curTest.plain : curTest.encrypted))
       begin
-        $display("AES_SIM_ERROR");
         $display("*** Error: Current output doesn't match expected");
         if(encryptedIn)
           $display("***        Inverse Phase");
@@ -179,7 +166,6 @@
     endfunction : Compare
 
     function void PrintError(bit [127:0] in, key, out, expected, bit inverse);
-      $display("AES_SIM_ERROR");
       $display("*** Error: Current output doesn't match expected");
       if(inverse)
         $display("***        Inverse Phase");
@@ -260,7 +246,6 @@
           
         if(curTest.roundKeys[i] !== roundKeys[i])
         begin
-          $display("AES_SIM_ERROR");
           $display("***      Error: Round key doesn't match expected");
           $display("***      Round:\t%0d", i);
           $display("*** Cipher Key:\t%h", curTest.key);
