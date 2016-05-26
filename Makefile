@@ -24,7 +24,6 @@ HVL_DIR ?= test/hvl
 
 COMPILE_CMD = vlog
 COMPILE_FLAGS = -mfcu 
-COMPILE_LOG = compile_log.log
 
 SIMULATE_CMD = vsim
 
@@ -114,15 +113,11 @@ all:
 		$(MAKE) compile KEY_WIDTH=$$WIDTH | tee -a $(ALL_LOG) ; \
 		$(MAKE) $(SIM_TARGETS) | tee -a $(ALL_LOG) ; done
 
-	@printf "\n\n"
-	@printf $(PRINT_BAR)
-	@printf "\nLog file: $(ALL_LOG)\n"
+	@printf "\n\n"; printf $(PRINT_BAR); printf "\nLog file: $(ALL_LOG)\n"
 	$(call check_log,"Errors: [1-9]","\nExecution Errors:\tYES","\nExecution Errors:\tNo")
 	$(call check_log,"Assertion error","\nAssertion Errors:\tYES","\nAssertion Errors:\tNo")
 	$(call check_log,"Warnings: [1-9]","\nWarnings:\t\tYES","\nWarnings:\t\tNo")
-	@printf $(PRINT_BAR)
-	@printf "\n\n"
-
+	@printf $(PRINT_BAR); printf "\n\n"
 
 clean:
 	rm -rf work transcript $(ALL_LOG)
