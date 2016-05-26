@@ -32,33 +32,35 @@ void print_block(unsigned char *arr, int len)
 //
 // Known Answer Test. Verifies that the libtomcrypt sequence produces correct results.
 // 
-int kat(void)
+int kat(int key_size, int num_rounds)
 {
     /* INCON AES ECB test vector(s) 1 */
-#ifdef AES_256
     unsigned char pt[BLOCKSIZE] = {0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a};
-    unsigned char et[BLOCKSIZE] = {0xf3, 0xee, 0xd1, 0xbd, 0xb5, 0xd2, 0xa0, 0x3c, 0x06, 0x4b, 0x5a, 0x7e, 0x3d, 0xb1, 0x81, 0xf8};
-    unsigned char key[KEYLEN] = {0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe, 0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81, 
-                                 0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4};
-#elif AES_192
-    unsigned char pt[BLOCKSIZE] = {0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a};
-    unsigned char et[BLOCKSIZE] = {0xbd, 0x33, 0x4f, 0x1d, 0x6e, 0x45, 0xf2, 0x5f, 0xf7, 0x12, 0xa2, 0x14, 0x57, 0x1f, 0xa5, 0xcc};
-    unsigned char key[KEYLEN] = {0x8e, 0x73, 0xb0, 0xf7, 0xda, 0x0e, 0x64, 0x52, 0xc8, 0x10, 0xf3, 0x2b, 0x80, 0x90, 0x79, 0xe5, 
-                                 0x62, 0xf8, 0xea, 0xd2, 0x52, 0x2c, 0x6b, 0x7b};
-#else // AES_128
-    unsigned char pt[BLOCKSIZE] = {0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a};
-    unsigned char et[BLOCKSIZE] = {0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97};
-    unsigned char key[KEYLEN] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
-#endif
+    //unsigned char et128[BLOCKSIZE] = {0xf3, 0xee, 0xd1, 0xbd, 0xb5, 0xd2, 0xa0, 0x3c, 0x06, 0x4b, 0x5a, 0x7e, 0x3d, 0xb1, 0x81, 0xf8};
+    //unsigned char et192[BLOCKSIZE] = {0xbd, 0x33, 0x4f, 0x1d, 0x6e, 0x45, 0xf2, 0x5f, 0xf7, 0x12, 0xa2, 0x14, 0x57, 0x1f, 0xa5, 0xcc};
+    //unsigned char et256[BLOCKSIZE] = {0x3a, 0xd7, 0x7b, 0xb4, 0x0d, 0x7a, 0x36, 0x60, 0xa8, 0x9e, 0xca, 0xf3, 0x24, 0x66, 0xef, 0x97};
+    unsigned char key256[32] = {0x60, 0x3d, 0xeb, 0x10, 0x15, 0xca, 0x71, 0xbe, 0x2b, 0x73, 0xae, 0xf0, 0x85, 0x7d, 0x77, 0x81, 
+                                0x1f, 0x35, 0x2c, 0x07, 0x3b, 0x61, 0x08, 0xd7, 0x2d, 0x98, 0x10, 0xa3, 0x09, 0x14, 0xdf, 0xf4};
+    unsigned char key192[24] = {0x8e, 0x73, 0xb0, 0xf7, 0xda, 0x0e, 0x64, 0x52, 0xc8, 0x10, 0xf3, 0x2b, 0x80, 0x90, 0x79, 0xe5, 
+                                0x62, 0xf8, 0xea, 0xd2, 0x52, 0x2c, 0x6b, 0x7b};
+    unsigned char key128[16] = {0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c};
 
     unsigned char ct[BLOCKSIZE];
     unsigned char ptm[BLOCKSIZE];
     symmetric_key skey; // scheduled key
 
-    printf("Running known answer test for keysize %dB\n", KEYLEN);
+    unsigned char *key;
+    if (key_size == KEYSIZE_128)
+        key = key128;
+    else if (key_size == KEYSIZE_192)
+        key = key192;
+    else
+        key = key256;
+
+    printf("Running known answer test for keysize %dB\n", key_size);
 
     /* setup variant */
-    aes_setup(key, KEYLEN, NUM_ROUNDS, &skey);
+    aes_setup(key, key_size, num_rounds, &skey);
 
     /* encrypt plaintext */
     aes_ecb_encrypt(pt, ct, &skey);
@@ -91,15 +93,15 @@ int kat(void)
 }
 
 //
-// Generates a random plaintext of BLOCKSIZE, a random key of KEYLEN, and an associated ciphertext.
+// Generates a random plaintext of BLOCKSIZE, a random key of key_size, and an associated ciphertext.
 // Outputs to correct files
 //
-int generate_vector(struct file_h *handle, prng_state *prng)
+int generate_vector(struct file_h *handle, prng_state *prng, int key_size, int num_rounds)
 {
     int i;
     unsigned char pt[BLOCKSIZE];
     unsigned char ct[BLOCKSIZE];
-    unsigned char key[KEYLEN];
+    unsigned char key[key_size];
     char buf [BLOCKSIZE];
     symmetric_key skey; // scheduled key
 
@@ -109,7 +111,7 @@ int generate_vector(struct file_h *handle, prng_state *prng)
     // 0 ct    
 
     /* setup variant */
-    aes_setup(key, KEYLEN, NUM_ROUNDS, &skey);
+    aes_setup(key, key_size, num_rounds, &skey);
 
     /* encrypt plaintext */
     aes_ecb_encrypt(pt, ct, &skey);
@@ -126,7 +128,7 @@ int generate_vector(struct file_h *handle, prng_state *prng)
         fprintf(handle->ct_file, "%02x", ct[i]);
     fputc(0xa, handle->ct_file);
 
-    for (i = 0; i < KEYLEN; i ++) 
+    for (i = 0; i < key_size; i ++) 
         fprintf(handle->key_file, "%02x", key[i]);
     fputc(0xa, handle->key_file);
 
@@ -139,13 +141,18 @@ int generate_vector(struct file_h *handle, prng_state *prng)
 int main(int argc, char **argv)
 {
     int i;
+    int key_size, num_rounds;
     struct file_h handle;
     prng_state prng;
 
     struct arguments args;
-    argp_parse(&argp, argc, argv, 0, 0, &args);
 
     /* Default arg values */
+    args.kat = 0;
+    args.num_vectors = 1;
+    args.variant = AES_128;
+
+    argp_parse(&argp, argc, argv, 0, 0, &args);
 
     /* register AES */
     if (register_cipher(&aes_desc)) {
@@ -164,9 +171,21 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+    /* select keysize */
+    if (args.variant == AES_256) {
+        key_size = KEYSIZE_256;
+        num_rounds = 14;
+    } else if (args.variant == AES_192) {
+        key_size = KEYSIZE_192;
+        num_rounds = 12;
+    } else { // AES_128
+        key_size = KEYSIZE_128;
+        num_rounds = 10;
+    }
+
     /* generate test vectors */
     if (args.kat) {
-        kat();
+        kat(key_size, num_rounds);
     } else {
         open_files(&handle);
         for (i = 0; i < args.num_vectors; i++) 
@@ -175,7 +194,7 @@ int main(int argc, char **argv)
             //    printf("Error adding entropy.\n");
             //    return EXIT_FAILURE;
             //}
-            generate_vector(&handle, &prng);
+            generate_vector(&handle, &prng, key_size, num_rounds);
         close_files(&handle);
     }
 
