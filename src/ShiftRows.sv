@@ -6,6 +6,10 @@ import AESDefinitions::*;
 
 module ShiftRows(input state_t in, 
                  output state_t out);
+/* ( 0  4  8 12)    ( 0  4  8 12)
+ * ( 1  5  9 13) => ( 5  9 13  1)
+ * ( 2  6 10 14)    (10 14  2  6)
+ * ( 3  7 11 15)    (15  7 11 15) */
 always_comb
   begin
     out = { in[0], in[5], in[10], in[15], in[4], in[9], in[14], in[3],
@@ -20,6 +24,10 @@ endmodule
 
 module ShiftRowsInverse(input state_t in,
                         output state_t out);
+/* ( 0  4  8 12)    ( 0  4  8 12)
+ * ( 1  5  9 13) => (13  1  5  9)
+ * ( 2  6 10 14)    (10 14  2  6)
+ * ( 3  7 11 15)    ( 7 11 15  3) */
 always_comb
   begin
     out = { in[0], in[13], in[10], in[7], in[4], in[1], in[14], in[11],
