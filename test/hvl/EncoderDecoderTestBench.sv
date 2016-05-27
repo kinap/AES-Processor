@@ -58,29 +58,26 @@ class ScoreBoard;
         expectEncrypted = curTest.encrypt;
         expectDecrypted = curTest.plain;
 
-        if(outEncrypted !== expectEncrypted)
+        assert (outEncrypted == expectEncrypted)
+          passCount++;
+        else
         begin
           $display("***Error: Encrypted output doesn't match expected");
           $display("***       Encrypted output: %h", outEncrypted);
           $display("***       Expected:         %h", expectEncrypted);
           errorCount++;
         end
-        else
-        begin
-          passCount++;
-        end
 
-        if(outDecrypted !== expectDecrypted)
+        assert (outDecrypted == expectDecrypted)
+          passCount++;
+        else
         begin
           $display("***Error: Decrypted output doesn't match expected");
           $display("***       Decrypted output: %h", outDecrypted);
           $display("***       Expected:         %h", expectDecrypted);
           errorCount++;
         end
-        else
-        begin
-          passCount++;
-        end
+
       end
 
       if(eom_flag && (sentTests.size() == 0))
