@@ -121,6 +121,7 @@ all:
 
 clean:
 	rm -rf work transcript $(ALL_LOG)
-	rm -rf velocework puresimwork standardwork veloce.log veloce.med veloce.map tbxbindings.h 
-	rm -rf velrunopts.ini modelsim.ini
+	rm -rf velocework puresimwork standardwork 
+	rm -rf veloce.log veloce.med veloce.map veloce.wave
+	rm -rf tbxbindings.h velrunopts.ini modelsim.ini edsenv vish_stacktrace.vstf
 
