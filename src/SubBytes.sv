@@ -4,7 +4,6 @@
 
 import AESDefinitions::*;
 
-// TODO: Parameterize the substitution width for this module
 module SubBytes(input state_t in,
                 output state_t out);
 
