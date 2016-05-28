@@ -66,6 +66,7 @@ class ScoreBoard;
           $display("***       Encrypted output: %h", outEncrypted);
           $display("***       Expected:         %h", expectEncrypted);
           errorCount++;
+          $error;
         end
 
         assert (outDecrypted == expectDecrypted)
@@ -76,6 +77,7 @@ class ScoreBoard;
           $display("***       Decrypted output: %h", outDecrypted);
           $display("***       Expected:         %h", expectDecrypted);
           errorCount++;
+          $error;
         end
 
       end
