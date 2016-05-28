@@ -8,7 +8,7 @@ module Buffer #(parameter type bType = logic) (input logic clock, reset, bType i
 
   always_ff @(posedge clock)
     begin
-    // Transfer the input to the output unless is asserted
+    // Transfer the input to the output unless reset is asserted
     if(reset)
       out <= 0;
     else
