@@ -10,8 +10,8 @@ module ShiftRowsTestBench();
 state_t in, inInv, out, outInv;
 
 // Module declaration
-ShiftRows Dut(in, out);
-ShiftRowsInverse Dut2(inInv, outInv);
+ShiftRows Dut(1'b1, in, out);
+ShiftRowsInverse Dut2(1'b1, inInv, outInv);
 
 // Test execution and verification task
 test_t curTest;

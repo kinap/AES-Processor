@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module ShiftRows(input state_t in, 
+module ShiftRows(input logic validInput, state_t in, 
                  output state_t out);
 /* ( 0  4  8 12)    ( 0  4  8 12)
  * ( 1  5  9 13) => ( 5  9 13  1)
@@ -22,7 +22,7 @@ always_comb
   end
 endmodule
 
-module ShiftRowsInverse(input state_t in,
+module ShiftRowsInverse(input logic validInput, state_t in,
                         output state_t out);
 /* ( 0  4  8 12)    ( 0  4  8 12)
  * ( 1  5  9 13) => (13  1  5  9)

@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module SubBytes(input state_t in,
+module SubBytes(input logic validInput, state_t in,
                 output state_t out);
 
 always_comb
@@ -23,7 +23,7 @@ always_comb
   end
 endmodule
 
-module SubBytesInverse(input state_t in,
+module SubBytesInverse(input logic validInput, state_t in,
                        output state_t out);
 
 always_comb

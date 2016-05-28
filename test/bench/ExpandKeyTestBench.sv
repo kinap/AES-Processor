@@ -12,6 +12,7 @@ expandedKeyTest_t curTest;
 int testCount = 0;
 
 ExpandKey mut(
+    .validInput(1'b1),
     .key(key), 
     .roundKeys(roundKeys)
 );

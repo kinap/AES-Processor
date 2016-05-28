@@ -10,8 +10,8 @@ module MixColumnsTestBench();
 state_t in, inInv, out, outInv;
 
 // Module declaration
-MixColumns Dut(in, out);
-MixColumnsInverse Dut2(inInv, outInv);
+MixColumns Dut(1'b1, in, out);
+MixColumnsInverse Dut2(1'b1, inInv, outInv);
 
 // Test exectuion and verfication task
 test_t curTest;

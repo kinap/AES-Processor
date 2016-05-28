@@ -11,7 +11,7 @@ state_t in, out;
 roundKey_t key;
 
 // Module declaration
-AddRoundKey Dut(in, key, out);
+AddRoundKey Dut(1'b1, in, key, out);
 
 // Test exectuion and verfication task
 keyTest_t curTest;

@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module BufferedRound(input logic clock, reset,
+module BufferedRound(input logic clock, reset, validInput,
                      input state_t in, roundKey_t key,
                      output state_t out);
 parameter RoundNum = 1;
@@ -12,12 +12,12 @@ parameter RoundNum = 1;
 // State wire for intermediate value
 state_t temp;
 
-Round #(RoundNum) round(in, key, temp);
+Round #(RoundNum) round(validInput, in, key, temp);
 Buffer #(state_t) buffer(clock, reset, temp, out);
 
 endmodule : BufferedRound
 
-module BufferedRoundInverse(input logic clock, reset,
+module BufferedRoundInverse(input logic clock, reset, validInput,
                             input state_t in, roundKey_t key,
                             output state_t out);
 parameter RoundNum = 1;
@@ -25,7 +25,7 @@ parameter RoundNum = 1;
 // State wire for intermediate value
 state_t temp;
 
-RoundInverse #(RoundNum) invRound(in, key, temp);
+RoundInverse #(RoundNum) invRound(validInput, in, key, temp);
 Buffer #(state_t) buffer(clock, reset, temp, out);
 
 endmodule : BufferedRoundInverse

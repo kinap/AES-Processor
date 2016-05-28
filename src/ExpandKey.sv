@@ -5,7 +5,7 @@
 import AESDefinitions::*;
 import SBox::*;
 
-module ExpandKey(input key_t key, output roundKeys_t roundKeys);
+module ExpandKey(input logic validInput, key_t key, output roundKeys_t roundKeys);
 
 localparam KEY_COL_SIZE = 4;
 

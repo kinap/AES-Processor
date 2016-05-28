@@ -10,8 +10,8 @@ module SubBytesTestBench();
 state_t in, inInv, out, outInv;
 
 // Module declaration
-SubBytes Dut(in, out);
-SubBytesInverse Dut2(inInv, outInv);
+SubBytes Dut(1'b1, in, out);
+SubBytesInverse Dut2(1'b1, inInv, outInv);
 
 // Test exectuion and verfication task
 test_t curTest;

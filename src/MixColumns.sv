@@ -13,7 +13,7 @@ import GaloisFieldFunctions::*;
 // (1  1  2  3)
 // (3  1  1  2)
 //
-module MixColumns(input state_t in, 
+module MixColumns(input logic validInput, state_t in, 
                  output state_t out);
 always_comb
   begin
@@ -39,7 +39,7 @@ endmodule
 // (13  9   14  11)
 // (11  13  9   14)
 //
-module MixColumnsInverse(input state_t in,
+module MixColumnsInverse(input logic validInput, state_t in,
                         output state_t out);
 always_comb
   begin

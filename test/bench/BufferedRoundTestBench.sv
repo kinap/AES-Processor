@@ -15,12 +15,12 @@ roundKey_t key, key2, keyInv2;
 logic clock, reset;
 
 // Module declaration
-BufferedRound Dut(clock, reset, in, key, out);
-BufferedRoundInverse Dut2(clock, reset, inInv, key, outInv);
+BufferedRound Dut(clock, reset, 1'b1, in, key, out);
+BufferedRoundInverse Dut2(clock, reset, 1'b1, inInv, key, outInv);
 
 // Test last round as a special case
-BufferedRound #(`NUM_ROUNDS) Dut3(clock, reset, in2, key2, out2);
-BufferedRoundInverse #(`NUM_ROUNDS) Dut4(clock, reset, inInv2, keyInv2, outInv2);
+BufferedRound #(`NUM_ROUNDS) Dut3(clock, reset, 1'b1, in2, key2, out2);
+BufferedRoundInverse #(`NUM_ROUNDS) Dut4(clock, reset, 1'b1, inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;
