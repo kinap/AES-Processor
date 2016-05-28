@@ -124,4 +124,5 @@ clean:
 	rm -rf velocework puresimwork standardwork 
 	rm -rf veloce.log veloce.med veloce.map veloce.wave
 	rm -rf tbxbindings.h velrunopts.ini modelsim.ini edsenv vish_stacktrace.vstf
+	rm -rf modelsim.ini_lock modelsim.ini_new
 
