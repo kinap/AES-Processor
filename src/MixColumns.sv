@@ -18,7 +18,7 @@ module MixColumns(input logic validInput, state_t in,
 always_comb
   begin
 
-    MixColsStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+    MixColsStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
 
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
@@ -47,7 +47,7 @@ module MixColumnsInverse(input logic validInput, state_t in,
 always_comb
   begin
 
-    MixColsInvStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+    MixColsInvStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
 
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin

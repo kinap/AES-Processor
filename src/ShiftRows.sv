@@ -13,7 +13,7 @@ module ShiftRows(input logic validInput, state_t in,
 always_comb
   begin
 
-    ShiftRowsStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+    ShiftRowsStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
 
     out = { in[0], in[5], in[10], in[15], in[4], in[9], in[14], in[3],
             in[8], in[13], in[2], in[7], in[12], in[1], in[6], in[11] };
@@ -34,7 +34,7 @@ module ShiftRowsInverse(input logic validInput, state_t in,
 always_comb
   begin
 
-    ShiftRowsInvStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+    ShiftRowsInvStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
 
     out = { in[0], in[13], in[10], in[7], in[4], in[1], in[14], in[11],
             in[8], in[5], in[2], in[15], in[12], in[9], in[6], in[3] };

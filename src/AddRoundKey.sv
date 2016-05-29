@@ -9,8 +9,8 @@ module AddRoundKey(input logic validInput, state_t in, roundKey_t roundKey,
 always_comb
   begin
 
-    AddRoundKeyStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
-    AddRoundKeyKeyKnown_a: assert ((~validInput) || (~$isunknown(roundKey)));
+    AddRoundKeyStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
+    AddRoundKeyKeyKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
 
     // The output is simply the input bitwise-xor'd with the round key
     out = in ^ roundKey;

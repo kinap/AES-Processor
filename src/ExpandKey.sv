@@ -43,7 +43,7 @@ assign roundKeys = (keyBlocks >> KEY_SCH_SHIFT);
 always_comb
 begin
 
-    ExpKeyKnownKey_a: assert ((~validInput) || (~$isunknown(key)));
+    ExpKeyKnownKey_a: assert ((validInput !== 1) || (!$isunknown(key)));
 
     keyBlocks[0] = key;
 
