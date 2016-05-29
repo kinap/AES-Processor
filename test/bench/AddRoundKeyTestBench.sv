@@ -29,7 +29,7 @@ begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
     key = curTest.roundKey;
-    valid = 1'b1;
+    valid <= 1'b1;
     #1 repeat(1);
     curOut = out;
     tester.Compare(in, curOut, curTest, 0);

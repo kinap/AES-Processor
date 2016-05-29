@@ -54,7 +54,7 @@ begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
     key = curTest.roundKey;
-    rndValid = 1'b1;
+    rndValid <= 1'b1;
     repeat(1) @(negedge clock);
     curOut = out;
     tester.Compare(in, curOut, curTest, 0);
@@ -68,7 +68,7 @@ begin
     curTest = tester.GetNextTest();
     inInv = curTest.plain;
     key = curTest.roundKey;
-    invValid = 1'b1;
+    invValid <= 1'b1;
     repeat(1) @(negedge clock);
     curOutInv = outInv;
     tester.Compare(inInv, curOutInv, curTest, 0);
@@ -90,8 +90,8 @@ begin
   inInv2 = 128'h6353E08C0960E104CD70B751BACAD0E7;
   key2 = 128'h13111D7FE3944A17F307A78B4D2B30C5;
   keyInv2 = 128'h000102030405060708090A0B0C0D0E0F;
-  rndLastValid = 1'b1;
-  invLastValid = 1'b1;
+  rndLastValid <= 1'b1;
+  invLastValid <= 1'b1;
   repeat(1) @(negedge clock);
   if(out2 !== expected1)
     testerFinal.PrintError(in2, key2, out2, expected1, 0);

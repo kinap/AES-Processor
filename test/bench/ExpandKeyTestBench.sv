@@ -28,7 +28,7 @@ begin
   begin
     curTest = tester.GetNextTest();
     key = curTest.key;
-    valid = 1'b1;
+    valid <= 1'b1;
     #1
     tester.Compare(curTest, roundKeys);
     ++testCount;
