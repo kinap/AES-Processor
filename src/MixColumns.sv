@@ -17,6 +17,9 @@ module MixColumns(input logic validInput, state_t in,
                  output state_t out);
 always_comb
   begin
+
+    MixColsStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
         out[i+0] = GfMultBy2(in[i+0]) ^ GfMultBy3(in[i+1]) ^ in[i+2]            ^ in[i+3];
@@ -43,6 +46,9 @@ module MixColumnsInverse(input logic validInput, state_t in,
                         output state_t out);
 always_comb
   begin
+
+    MixColsInvStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
         out[i+0] = GfMultBy14(in[i+0]) ^ GfMultBy11(in[i+1]) ^ GfMultBy13(in[i+2]) ^ GfMultBy9(in[i+3]);

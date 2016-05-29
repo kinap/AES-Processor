@@ -8,6 +8,10 @@ module AddRoundKey(input logic validInput, state_t in, roundKey_t roundKey,
                   output state_t out);
 always_comb
   begin
+
+    AddRoundKeyStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+    AddRoundKeyKeyKnown_a: assert ((~validInput) || (~$isunknown(roundKey)));
+
     // The output is simply the input bitwise-xor'd with the round key
     out = in ^ roundKey;
     `ifdef DEBUG

@@ -43,6 +43,8 @@ assign roundKeys = (keyBlocks >> KEY_SCH_SHIFT);
 always_comb
 begin
 
+    ExpKeyKnownKey_a: assert ((~validInput) || (~$isunknown(key)));
+
     keyBlocks[0] = key;
 
     for (int j=1; j<=NUM_KEY_EXP_ROUNDS; ++j)
@@ -113,3 +115,4 @@ function automatic expKeyColumn_t Rot(input expKeyColumn_t in);
 endfunction
 
 endmodule
+

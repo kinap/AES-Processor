@@ -4,15 +4,16 @@
 
 import AESTestDefinitions::*;
 
-module ExpandKeyTestBench();
+module ExpandKeyTestBench;
 
 key_t key;
 roundKeys_t roundKeys;
 expandedKeyTest_t curTest;
 int testCount = 0;
+logic valid = 1'b0;
 
 ExpandKey mut(
-    .validInput(1'b1),
+    .validInput(valid),
     .key(key), 
     .roundKeys(roundKeys)
 );
@@ -27,6 +28,7 @@ begin
   begin
     curTest = tester.GetNextTest();
     key = curTest.key;
+    valid = 1'b1;
     #1
     tester.Compare(curTest, roundKeys);
     ++testCount;
@@ -37,3 +39,4 @@ begin
 end
 
 endmodule
+

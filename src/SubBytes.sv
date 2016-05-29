@@ -9,6 +9,9 @@ module SubBytes(input logic validInput, state_t in,
 
 always_comb
   begin
+
+    SubBytesStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+
     // Each byte of the output is the element in the sbox LUT where the high
     // and low parts of the input byte are used as the indices of the 2D LUT
     for(int i = 0; i < 16; i++)
@@ -28,6 +31,9 @@ module SubBytesInverse(input logic validInput, state_t in,
 
 always_comb
   begin
+
+    SubBytesInvStateKnown_a: assert ((~validInput) || (~$isunknown(in)));
+
     // Each byte of the output is the element in the inverse sbox LUT where the
     // high and low parts of the input byte are used as the indices of the 2D 
     // LUT
