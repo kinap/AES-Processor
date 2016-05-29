@@ -42,7 +42,7 @@
     endfunction : NumTests
 
     function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
-      ShiftRows_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
+      CompareOutput_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
       else
       begin
         $display("*** Error: Current output doesn't match expected");
