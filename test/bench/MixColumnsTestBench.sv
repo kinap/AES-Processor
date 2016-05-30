@@ -8,10 +8,11 @@ module MixColumnsTestBench();
 
 // Input and Output connections
 state_t in, inInv, out, outInv;
+logic valid = 1'b0;
 
 // Module declaration
-MixColumns Dut(in, out);
-MixColumnsInverse Dut2(inInv, outInv);
+MixColumns Dut(valid, in, out);
+MixColumnsInverse Dut2(valid, inInv, outInv);
 
 // Test exectuion and verfication task
 test_t curTest;
@@ -28,6 +29,7 @@ begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
     inInv = curTest.encrypted;
+    valid <= 1'b1;
     #1 repeat(1);
     curOut = out;
     curOutInv = outInv;

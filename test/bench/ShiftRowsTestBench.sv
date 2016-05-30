@@ -8,10 +8,11 @@ module ShiftRowsTestBench();
 
 // Input and Output connections
 state_t in, inInv, out, outInv;
+logic valid = 1'b0;
 
 // Module declaration
-ShiftRows Dut(in, out);
-ShiftRowsInverse Dut2(inInv, outInv);
+ShiftRows Dut(valid, in, out);
+ShiftRowsInverse Dut2(valid, inInv, outInv);
 
 // Test execution and verification task
 test_t curTest;
@@ -28,6 +29,7 @@ begin
     curTest = tester.GetNextTest();
     in = curTest.plain;
     inInv = curTest.encrypted;
+    valid <= 1'b1;
     #1 repeat(1);
     curOut = out;
     curOutInv = outInv;

@@ -12,7 +12,7 @@ import AESDefinitions::*;
 // (1  1  2  3)
 // (3  1  1  2)
 //
-module MixColumns(input state_t in, 
+module MixColumns(input logic validInput, state_t in, 
                  output state_t out);
 
 byte_t GfMult2Lut[0:255];
@@ -26,6 +26,9 @@ end
 
 always_comb
   begin
+
+    MixColsStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
+
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
 
@@ -49,7 +52,7 @@ endmodule
 // (13  9   14  11)
 // (11  13  9   14)
 //
-module MixColumnsInverse(input state_t in,
+module MixColumnsInverse(input logic validInput, state_t in,
                         output state_t out);
 
 byte_t GfMult9Lut[0:255];
@@ -67,6 +70,9 @@ end
 
 always_comb
   begin
+
+    MixColsInvStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
+
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
         out[i+0] = GfMult14Lut[in[i+0]] ^ GfMult11Lut[in[i+1]] ^ GfMult13Lut[in[i+2]] ^ GfMult9Lut[in[i+3]];

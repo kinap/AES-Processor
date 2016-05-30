@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module ExpandKey(input key_t key, output roundKeys_t roundKeys);
+module ExpandKey(input logic validInput, key_t key, output roundKeys_t roundKeys);
 
 localparam KEY_COL_SIZE = 4;
 
@@ -47,6 +47,8 @@ end
 
 always_comb
 begin
+
+    ExpKeyKnownKey_a: assert ((validInput !== 1) || (!$isunknown(key)));
 
     keyBlocks[0] = key;
 
@@ -116,3 +118,4 @@ function automatic expKeyColumn_t SubBytes_4(input expKeyColumn_t in);
 endfunction
 
 endmodule
+

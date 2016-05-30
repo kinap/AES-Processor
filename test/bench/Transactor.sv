@@ -20,7 +20,7 @@ typedef struct packed {
 module Transactor;
 
 // Clock generation
-logic clock;
+logic clock = 0;
 //tbx clkgen
 initial
 begin
@@ -29,7 +29,7 @@ forever #10 clock=~clock;
 end
 
 // Reset generation
-logic reset;
+logic reset = 1;
 //tbx clkgen
 initial
 begin

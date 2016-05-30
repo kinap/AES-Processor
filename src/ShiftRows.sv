@@ -4,7 +4,7 @@
 
 import AESDefinitions::*;
 
-module ShiftRows(input state_t in, 
+module ShiftRows(input logic validInput, state_t in, 
                  output state_t out);
 /* ( 0  4  8 12)    ( 0  4  8 12)
  * ( 1  5  9 13) => ( 5  9 13  1)
@@ -12,6 +12,9 @@ module ShiftRows(input state_t in,
  * ( 3  7 11 15)    (15  7 11 15) */
 always_comb
   begin
+
+    ShiftRowsStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
+
     out = { in[0], in[5], in[10], in[15], in[4], in[9], in[14], in[3],
             in[8], in[13], in[2], in[7], in[12], in[1], in[6], in[11] };
     `ifdef DEBUG
@@ -22,7 +25,7 @@ always_comb
   end
 endmodule
 
-module ShiftRowsInverse(input state_t in,
+module ShiftRowsInverse(input logic validInput, state_t in,
                         output state_t out);
 /* ( 0  4  8 12)    ( 0  4  8 12)
  * ( 1  5  9 13) => (13  1  5  9)
@@ -30,6 +33,9 @@ module ShiftRowsInverse(input state_t in,
  * ( 3  7 11 15)    ( 7 11 15  3) */
 always_comb
   begin
+
+    ShiftRowsInvStateKnown_a: assert ((validInput !== 1) || (!$isunknown(in)));
+
     out = { in[0], in[13], in[10], in[7], in[4], in[1], in[14], in[11],
             in[8], in[5], in[2], in[15], in[12], in[9], in[6], in[3] };
     `ifdef DEBUG
