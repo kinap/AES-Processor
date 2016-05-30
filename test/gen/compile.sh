@@ -1,1 +1,3 @@
-gcc -Wall -Wextra -g -I/u/daniel28/libtomcrypt/src/headers -I/u/daniel28/libtomcrypt/src/ciphers -L/u/daniel28/libtomcrypt AESGen.c -ltomcrypt -o AESGen
+#!/bin/bash
+lib_dir=~/libtomcrypt
+gcc -Wall -Wextra -g -I${lib_dir}/src/headers -L${lib_dir} AESGen.c -ltomcrypt -o AESGen
