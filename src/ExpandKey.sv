@@ -3,7 +3,6 @@
 //
 
 import AESDefinitions::*;
-import SBox::*;
 
 module ExpandKey(input key_t key, output roundKeys_t roundKeys);
 
@@ -39,6 +38,12 @@ typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
 
 expKeyBlock_t [0:NUM_KEY_EXP_ROUNDS] keyBlocks;
 assign roundKeys = (keyBlocks >> KEY_SCH_SHIFT);
+
+byte_t sbox[0:255];
+initial
+begin
+  $readmemh("./src/mem/Sbox.mem", sbox);
+end
 
 always_comb
 begin
@@ -93,22 +98,20 @@ function automatic expKeyColumn_t ApplyRcon(input integer round, expKeyColumn_t 
 
 endfunction
 
-function automatic expKeyColumn_t SubBytes_4(input expKeyColumn_t in);
-
-    expKeyColumn_t out;
-
-    for(int i=0; i<=3; ++i)
-    begin
-      out[i] = sbox[in[i][7:4]][in[i][3:0]];
-    end
-
-    return out;
-
-endfunction
-
 function automatic expKeyColumn_t Rot(input expKeyColumn_t in);
 
     return {in[1:KEY_COL_SIZE-1], in[0]};
+
+endfunction
+
+function automatic expKeyColumn_t SubBytes_4(input expKeyColumn_t in);
+
+    expKeyColumn_t out;
+    for(int i=0; i<=3; ++i)
+    begin
+      out[i] = sbox[(in[i][7:4]*16) + in[i][3:0]];
+    end
+    return out;
 
 endfunction
 
