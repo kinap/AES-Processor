@@ -47,8 +47,6 @@ class ScoreBoard;
       outDecrypted = {<<byte{result[1:AES_STATE_SIZE]}};
       decryptValid = result[0][3:0];
 
-      //Don't think the second recieve is needed.
-
       outEncrypted = {<<byte{result[AES_STATE_SIZE+1:(2*AES_STATE_SIZE)]}};
       encryptValid = result[0][7:4];
 
@@ -102,19 +100,6 @@ class StimulusGeneration;
   int i, j, k;
 
   string plainFN, encryptFN, keyFN;
-  /*`ifdef AES_192
-    plainFN = "test/vectors/plain_192.txt";
-    encryptFN = "test/vectors/encrypted_192.txt";
-    keyFN = "test/vectors/key_192.txt";
-  `elsif AES_256
-    plainFN = "test/vectors/plain_256.txt";
-    encryptFN = "test/vectors/encrypted_256.txt";
-    keyFN = "test/vectors/key_256.txt";
-  `else
-    plainFN = "test/vectors/plain.txt";
-    encryptFN = "test/vectors/encrypted.txt";
-    keyFN = "test/vectors/key.txt";
-  `endif*/
 
   function new();
   begin
