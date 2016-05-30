@@ -102,7 +102,6 @@ int generate_vector(struct file_h *handle, prng_state *prng, int key_size, int n
     unsigned char pt[BLOCKSIZE];
     unsigned char ct[BLOCKSIZE];
     unsigned char key[key_size];
-    char buf [BLOCKSIZE];
     symmetric_key skey; // scheduled key
 
     /* Generate random data */

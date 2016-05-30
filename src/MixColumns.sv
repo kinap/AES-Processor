@@ -4,7 +4,6 @@
 //
 
 import AESDefinitions::*;
-import GaloisFieldFunctions::*;
 
 //
 // Matrix used to perform matrix multiplication in GF(2^8):
@@ -15,6 +14,16 @@ import GaloisFieldFunctions::*;
 //
 module MixColumns(input logic validInput, state_t in, 
                  output state_t out);
+
+byte_t GfMult2Lut[0:255];
+byte_t GfMult3Lut[0:255];
+
+initial
+begin
+  $readmemh("./src/mem/GfMult2Lut.mem", GfMult2Lut);
+  $readmemh("./src/mem/GfMult3Lut.mem", GfMult3Lut);
+end
+
 always_comb
   begin
 
@@ -22,10 +31,11 @@ always_comb
 
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
-        out[i+0] = GfMultBy2(in[i+0]) ^ GfMultBy3(in[i+1]) ^ in[i+2]            ^ in[i+3];
-        out[i+1] = in[i+0]            ^ GfMultBy2(in[i+1]) ^ GfMultBy3(in[i+2]) ^ in[i+3];
-        out[i+2] = in[i+0]            ^ in[i+1]            ^ GfMultBy2(in[i+2]) ^ GfMultBy3(in[i+3]);
-        out[i+3] = GfMultBy3(in[i+0]) ^ in[i+1]            ^ in[i+2]            ^ GfMultBy2(in[i+3]);
+
+        out[i+0] = GfMult2Lut[in[i+0]] ^ GfMult3Lut[in[i+1]] ^ in[i+2]             ^ in[i+3];
+        out[i+1] = in[i+0]             ^ GfMult2Lut[in[i+1]] ^ GfMult3Lut[in[i+2]] ^ in[i+3];
+        out[i+2] = in[i+0]             ^ in[i+1]             ^ GfMult2Lut[in[i+2]] ^ GfMult3Lut[in[i+3]];
+        out[i+3] = GfMult3Lut[in[i+0]] ^ in[i+1]             ^ in[i+2]             ^ GfMult2Lut[in[i+3]];
       end
   `ifdef DEBUG
     $display("%m");
@@ -44,6 +54,20 @@ endmodule
 //
 module MixColumnsInverse(input logic validInput, state_t in,
                         output state_t out);
+
+byte_t GfMult9Lut[0:255];
+byte_t GfMult11Lut[0:255];
+byte_t GfMult13Lut[0:255];
+byte_t GfMult14Lut[0:255];
+
+initial
+begin
+ $readmemh("./src/mem/GfMult9Lut.mem", GfMult9Lut);
+ $readmemh("./src/mem/GfMult11Lut.mem", GfMult11Lut);
+ $readmemh("./src/mem/GfMult13Lut.mem", GfMult13Lut);
+ $readmemh("./src/mem/GfMult14Lut.mem", GfMult14Lut);
+end
+
 always_comb
   begin
 
@@ -51,10 +75,10 @@ always_comb
 
     for (int i = 0; i < AES_STATE_SIZE; i = i+4)
       begin
-        out[i+0] = GfMultBy14(in[i+0]) ^ GfMultBy11(in[i+1]) ^ GfMultBy13(in[i+2]) ^ GfMultBy9(in[i+3]);
-        out[i+1] = GfMultBy9(in[i+0])  ^ GfMultBy14(in[i+1]) ^ GfMultBy11(in[i+2]) ^ GfMultBy13(in[i+3]);
-        out[i+2] = GfMultBy13(in[i+0]) ^ GfMultBy9(in[i+1])  ^ GfMultBy14(in[i+2]) ^ GfMultBy11(in[i+3]);
-        out[i+3] = GfMultBy11(in[i+0]) ^ GfMultBy13(in[i+1]) ^ GfMultBy9(in[i+2])  ^ GfMultBy14(in[i+3]);
+        out[i+0] = GfMult14Lut[in[i+0]] ^ GfMult11Lut[in[i+1]] ^ GfMult13Lut[in[i+2]] ^ GfMult9Lut[in[i+3]];
+        out[i+1] = GfMult9Lut[in[i+0]]  ^ GfMult14Lut[in[i+1]] ^ GfMult11Lut[in[i+2]] ^ GfMult13Lut[in[i+3]];
+        out[i+2] = GfMult13Lut[in[i+0]] ^ GfMult9Lut[in[i+1]]  ^ GfMult14Lut[in[i+2]] ^ GfMult11Lut[in[i+3]];
+        out[i+3] = GfMult11Lut[in[i+0]] ^ GfMult13Lut[in[i+1]] ^ GfMult9Lut[in[i+2]]  ^ GfMult14Lut[in[i+3]];
       end
   `ifdef DEBUG
     $display("%m");
