@@ -47,7 +47,7 @@ TST_FILES = \
 HVL_FILES = $(HVL_DIR)/EncoderDecoderTestBench.sv
 
 SIM_TARGETS = sim_subbytes sim_shiftrows sim_mixcolumns sim_addroundkey \
-              sim_round sim_buffered_round sim_expandkey sim_encoder_decoder
+              sim_round sim_bufferedround sim_expandkey sim_encoderdecoder
 
 compile:
 
@@ -85,13 +85,13 @@ sim_addroundkey:
 sim_round:
 	$(SIMULATE_CMD) RoundTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
-sim_buffered_round:
+sim_bufferedround:
 	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_expandkey:
 	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
-sim_encoder_decoder:
+sim_encoderdecoder:
 ifneq ($(MODE),standard)
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 endif
