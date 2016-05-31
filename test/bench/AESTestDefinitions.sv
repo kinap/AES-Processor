@@ -26,7 +26,7 @@
   class UnitTester;
     test_t qTests[$];
 
-    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted);
+    function void AddTestCase(state_t plain, state_t encrypted);
       test_t newTest;
       $cast(newTest.plain, plain);
       $cast(newTest.encrypted, encrypted);
@@ -41,7 +41,7 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(bit [127:0] in, bit [127:0] out, test_t curTest, bit encryptedIn);
+    function void Compare(state_t in, state_t out, test_t curTest, bit encryptedIn);
       CompareOutput_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
       else
       begin
@@ -58,7 +58,7 @@
     endfunction : Compare
 
     function void ParseFileForTestCases(string testFile, string phaseString);
-      bit [127:0] parse1, parse2;
+      state_t parse1, parse2;
       string parseString, tempString;
       int i, file;
       file = $fopen(testFile, "r");
@@ -79,7 +79,7 @@
   class UnitKeyTester;
     keyTest_t qTests[$];
 
-    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted, [127:0] roundKey);
+    function void AddTestCase(state_t plain, state_t encrypted, roundKey_t roundKey);
       keyTest_t newTest;
       $cast(newTest.plain, plain);
       $cast(newTest.encrypted, encrypted);
@@ -101,7 +101,7 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
+    function void Compare(state_t in, state_t out, keyTest_t curTest, bit encryptedIn);
       AddRoundKey_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
       else
       begin
@@ -119,7 +119,7 @@
     endfunction : Compare
 
     function void ParseFileForTestCases(string testFile, string phaseString);
-      bit [127:0] parse1, parse2, parse3;
+      state_t parse1, parse2, parse3;
       string parseString, tempString;
       int i, file;
       file = $fopen(testFile, "r");
@@ -143,7 +143,7 @@
   class RoundTester;
     keyTest_t qTests[$];
 
-    function void AddTestCase(bit [127:0] plain, bit [127:0] encrypted, [127:0] roundKey);
+    function void AddTestCase(state_t plain, state_t encrypted, roundKey_t roundKey);
       keyTest_t newTest;
       $cast(newTest.plain, plain);
       $cast(newTest.encrypted, encrypted);
@@ -159,7 +159,7 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(bit [127:0] in, bit [127:0] out, keyTest_t curTest, bit encryptedIn);
+    function void Compare(state_t in, state_t out, keyTest_t curTest, bit encryptedIn);
       Round_a: assert (out == (encryptedIn ? curTest.plain : curTest.encrypted))
       else
       begin
@@ -171,7 +171,7 @@
       end
     endfunction : Compare
 
-    function void PrintError(bit [127:0] in, key, out, expected, bit inverse);
+    function void PrintError(state_t in, key, out, expected, bit inverse);
       $display("*** Error: Current output doesn't match expected");
       if(inverse)
         $display("***        Inverse Phase");
@@ -185,7 +185,8 @@
     endfunction : PrintError
 
     function void ParseFileForTestCases(string testFile);
-      bit [127:0] parse1, plain, encrypt, key;
+      state_t parse1, plain, encrypt;
+      roundKey_t key;
       string parseString, tempString;
       int i, file;
       bit [127:0] inputs[$];
