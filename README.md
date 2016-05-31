@@ -6,7 +6,7 @@ Alex Pearson, Scott Lawson, Daniel Collins
 
 ### Description
 
-Parameterized AES encryptor and decryptor written in System Verilog. Supports the three standardized key sizes (128 bits, 192 bits, and 256 bits), chosen at compile time. Adheres to the Advanced Encryption Standard (AES) published by the National Institute of Standards and Technology (NIST), AES FIPS PUB 197. Verified using test vectors provided by the standard and produced by the [LibTomCrpyt C library](https://github.com/libtom/libtomcrypt). Verification done in simulation with [Mentor Graphics ModelSim&reg;](https://www.mentor.com/products/fv/modelsim/) and emulation on the [Mentor Graphics Veloce&reg;](https://www.mentor.com/products/fv/emulation-systems/).
+Parameterized AES encryptor and decryptor written in System Verilog. Supports the three standardized key sizes (128 bits, 192 bits, and 256 bits), chosen at compile time. Adheres to the Advanced Encryption Standard (AES) published by the National Institute of Standards and Technology (NIST), AES FIPS PUB 197. Verified using test vectors provided by the standard and produced by the [LibTomCrypt C library](https://github.com/libtom/libtomcrypt). Verification done in simulation with [Mentor Graphics ModelSim&reg;](https://www.mentor.com/products/fv/modelsim/) and emulation on the [Mentor Graphics Veloce&reg;](https://www.mentor.com/products/fv/emulation-systems/).
 
 ### Repository Contents
 
