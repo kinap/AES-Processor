@@ -31,7 +31,7 @@ All of the recipes in the provided Makefile assume the user is on a Linux system
 | Recipe        | Action
 |---------------| ------
 | compile       | Compiles all source and testbench files
-| sim_<module\> | Simulates the specified module using its testbench (note: the recipe names do not exactly match the module names - see Makefile contents for the recipe to run a specific testbench)
+| sim_\<module\> | Simulates the specified module using its testbench (note: the recipe names do not exactly match the module names - see Makefile contents for the recipe to run a specific testbench)
 | all           | Compiles all modules for all valid key widths, and runs all testbenches for each key width. All output is tee'd into all.log. After everything is complete, grep is used to search the log file for reported errors and warnings. A note is displayed to inform the user if any warnings or errors are present in the log file.
 
 ##### Options
