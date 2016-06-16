@@ -66,7 +66,7 @@ ifeq ($(MODE),veloce) # Compiling for puresim
 	velcomp -top Transactor
 
 endif # Compiling either for Veloce or Veloce puresim
-	velhvl -sim $(MODE)
+	velhvl -enable_profile_report -sim $(MODE)
 
 endif
 
