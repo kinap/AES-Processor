@@ -21,7 +21,7 @@ module Transactor;
 
 // Clock generation
 logic clock = 0;
-//tbx clkgen
+//tbx clkgen inactive_negedge
 initial
 begin
 clock=0;
@@ -47,12 +47,14 @@ AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeValid
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
-                   .PAYLOAD_MAX_ELEMENTS(1)
+                   .PAYLOAD_MAX_ELEMENTS(1),
+                   .BUFFER_MAX_ELEMENTS(100)
                   ) inputpipe(clock);
 
 // Output Pipe Instantiation
 scemi_output_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+1),
-                    .PAYLOAD_MAX_ELEMENTS(1)
+                    .PAYLOAD_MAX_ELEMENTS(1),
+                    .BUFFER_MAX_ELEMENTS(100)
                   ) outputpipe(clock);
 
 //XRTL FSM to obtain operands from the HVL side
