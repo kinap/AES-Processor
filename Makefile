@@ -64,6 +64,7 @@ else # Compiling either for Veloce, or Veloce puresim
 ifeq ($(MODE),veloce) # Compiling for puresim
 	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv
 	velcomp -top Transactor
+	velcp -o criticalpath.txt -cfgDir ./veloce.med
 
 endif # Compiling either for Veloce or Veloce puresim
 	velhvl -enable_profile_report -sim $(MODE)
@@ -125,4 +126,5 @@ clean:
 	rm -rf veloce.log veloce.med veloce.map veloce.wave
 	rm -rf tbxbindings.h velrunopts.ini modelsim.ini edsenv vish_stacktrace.vstf
 	rm -rf modelsim.ini_lock modelsim.ini_new
+	rm -f  criticalpath.txt
 
