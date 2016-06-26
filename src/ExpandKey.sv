@@ -4,10 +4,10 @@
 
 import AESDefinitions::*;
 
-module ExpandKey(input logic clock, reset, validInput, key_t key, output roundKeys_t roundKeys);
+module ExpandKey(input logic clock, reset, key_t key, output roundKeys_t roundKeys);
 
 roundKeys_t roundKeyOutput[`NUM_ROUNDS+1];
-ExpandKeyInternal keyExpBlock(validInput, key, roundKeyOutput[0]);
+ExpandKeyInternal keyExpBlock(key, roundKeyOutput[0]);
 
 genvar i;
 generate
@@ -24,7 +24,7 @@ endgenerate
 
 endmodule
 
-module ExpandKeyInternal(input logic validInput, key_t key, output roundKeys_t roundKeys);
+module ExpandKeyInternal(input key_t key, output roundKeys_t roundKeys);
 
 localparam KEY_COL_SIZE = 4;
 
@@ -67,8 +67,6 @@ end
 
 always_comb
 begin
-
-    ExpKeyKnownKey_a: assert ((validInput !== 1) || (!$isunknown(key)));
 
     keyBlocks[0] = key;
 
