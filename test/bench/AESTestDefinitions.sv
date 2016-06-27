@@ -246,25 +246,6 @@
       return qTests.size();
     endfunction : NumTests
 
-    function void Compare(expandedKeyTest_t curTest, roundKeys_t roundKeys);
-
-      for (int i=0; i<=`NUM_ROUNDS; ++i)
-      begin
-          
-        KeySchedule_a: assert (curTest.roundKeys[i] == roundKeys[i])
-        else
-        begin
-          $display("***      Error: Round key doesn't match expected");
-          $display("***      Round:\t%0d", i);
-          $display("*** Cipher Key:\t%h", curTest.key);
-          $display("***   Expected:\t%h", curTest.roundKeys[i]);
-          $display("***     Actual:\t%h", roundKeys[i]);
-          $error;
-        end
-
-      end
-    endfunction : Compare
-
     function void ParseFileForTestCases(string vectorFile);
       key_t key;
       roundKeys_t roundKeys;
