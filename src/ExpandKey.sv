@@ -11,7 +11,7 @@ ExpandKeyInternal keyExpBlock(key, roundKeyOutput[0]);
 
 genvar i;
 generate
-  for(i = 0; i <= `NUM_ROUNDS; i++)
+  for(i=0; i <= `NUM_ROUNDS; i++)
     begin
 
       assign roundKeys[i] = roundKeyOutput[i][i];

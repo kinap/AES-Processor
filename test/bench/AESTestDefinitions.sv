@@ -272,6 +272,18 @@
 
     endfunction : ParseFileForTestCases
 
+    function void ReportError(roundKey_t expected, actual, key_t key, int round, keyNum);
+
+      $display("***      Error: Round key doesn't match expected");
+      $display("***      Round:\t%0d", round);
+      $display("*** Key Number:\t%0d", keyNum);
+      $display("*** Cipher Key:\t%h", key);
+      $display("***   Expected:\t%h", expected);
+      $display("***     Actual:\t%h", actual);
+      $error;
+
+    endfunction : ReportError
+
   endclass : KeyScheduleTester
 
   endpackage : AESTestDefinitions
