@@ -50,7 +50,7 @@ begin
 
   curTest = tester.GetNextTest();
 
-  $monitor("Time: %t\troundKeysAct:\t%h", $time, roundKeysAct);
+//  $monitor("Time: %t\troundKeysAct:\t%h", $time, roundKeysAct);
 //  $monitor("testFIFO[0]:\t%p\ntestFIFO[1]:\t%p\ntestFIFO[2]:\t%p", testFIFO[0], testFIFO[1],
 //    testFIFO[2]);
 
@@ -78,7 +78,8 @@ begin
     for (int j=0; j<=KEY_CYCLE_COUNT; ++j)
     begin
 
-      @(negedge clock)
+//      @(negedge clock)
+      #0;
       for (int i=0; i<=`NUM_ROUNDS; ++i)
       begin
 
@@ -88,13 +89,12 @@ begin
 //          $display("curTest.roundKeys:\t%h", testFIFO[i].roundKeys);
 
         end
-        $display("Time: %t\tExpected:\t%h", $time, testFIFO[i].roundKeys[i]);
-        $display("Time: %t\tActual:\t%h", $time, roundKeysAct[i]);
+//        $display("Time: %t\tExpected:\t%h", $time, testFIFO[i].roundKeys[i]);
+//        $display("Time: %t\tActual:\t%h", $time, roundKeysAct[i]);
         
       end
     end
 
-    break;
     ++testCount;
 
   end
