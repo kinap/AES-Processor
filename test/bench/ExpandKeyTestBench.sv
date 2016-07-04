@@ -50,21 +50,19 @@ begin
 
   curTest = tester.GetNextTest();
 
-//  $monitor("Time: %t\troundKeysAct:\t%h", $time, roundKeysAct);
-//  $monitor("testFIFO[0]:\t%p\ntestFIFO[1]:\t%p\ntestFIFO[2]:\t%p", testFIFO[0], testFIFO[1],
-//    testFIFO[2]);
-
   for (int i=0; i<=`NUM_ROUNDS; ++i)
   begin
 
-    @(negedge clock)
+    #0;
     if (testFIFO[0].roundKeys[i] !== roundKeysAct[i])
       tester.ReportError(testFIFO[0].roundKeys[i], roundKeysAct[i], key, i, 0);
-//    $display("Expected:\t%h", testFIFO[0].roundKeys[i]);
-//    $display("Actual:\t%h", roundKeysAct[i]);
+
+    @(negedge clock);
+
   end
 
   ++testCount;
+  $display("current round keys: %h", roundKeysAct);
 
   while(tester.NumTests() != 0)
   begin
@@ -73,31 +71,48 @@ begin
     // every round key should correspond to the correct input key as it's propogated through the
     // round pipeline. Start a new key every KEY_CYCLE_COUNT cycles. 
     curTest = tester.GetNextTest();
-    @(posedge clock);
+    @(negedge clock);
 
+    // confirm that key changes propogate correctly
     for (int j=0; j<=KEY_CYCLE_COUNT; ++j)
     begin
 
-//      @(negedge clock)
       #0;
       for (int i=0; i<=`NUM_ROUNDS; ++i)
       begin
 
         if (testFIFO[i].roundKeys[i] !== roundKeysAct[i])
-        begin
           tester.ReportError(testFIFO[i].roundKeys[i], roundKeysAct[i], testFIFO[i].key, i, testCount);
-//          $display("curTest.roundKeys:\t%h", testFIFO[i].roundKeys);
 
-        end
-//        $display("Time: %t\tExpected:\t%h", $time, testFIFO[i].roundKeys[i]);
-//        $display("Time: %t\tActual:\t%h", $time, roundKeysAct[i]);
-        
       end
+
+      @(negedge clock);
+
     end
+    $display("current round keys: %h", roundKeysAct);
 
     ++testCount;
 
   end
+
+  // confirm that the last key's round keys are propogated to the last round key
+  for (int j=0; j<=`NUM_ROUNDS-KEY_CYCLE_COUNT; ++j)
+  begin
+
+    #0;
+    for (int i=0; i<=`NUM_ROUNDS; ++i)
+    begin
+
+      if (testFIFO[i].roundKeys[i] !== roundKeysAct[i])
+        tester.ReportError(testFIFO[i].roundKeys[i], roundKeysAct[i], testFIFO[i].key, i, testCount);
+
+    end
+
+    @(negedge clock);
+
+  end
+  
+  $display("current round keys: %h", roundKeysAct);
 
   $display("ExpandKeyTestBench executed %0d test cases", testCount);
   $finish();
