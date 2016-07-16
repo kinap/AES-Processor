@@ -16,78 +16,6 @@ int key_file;
 inputTest_t sentTests [$];
 int errorCount = 0, passCount = 0;
 
-// Scoreboard class
-// Monitors output pipe, compare to golden result
-class ScoreBoard;
-  state_t data;
-  key_t key;
-  state_t outEncrypted, outDecrypted,
-          expectEncrypted, expectDecrypted;
-  logic [3:0] encryptValid, decryptValid;
-  inputTest_t curTest;
-
-  scemi_dynamic_output_pipe monitor;
-
-  function new();
-  begin
-    monitor = new("Transactor.outputpipe");
-  end
-  endfunction : new
-
-  task run();
-    bit eom_flag;
-    bit [1:0] ne_valid;
-    while(1)
-    begin
-      automatic byte unsigned result[] = new[2*AES_STATE_SIZE+1];
-
-      //Note - this function call is blocking, waits until result is available
-      monitor.receive_bytes(1, ne_valid, result, eom_flag);
-
-      outDecrypted = {<<byte{result[1:AES_STATE_SIZE]}};
-      decryptValid = result[0][3:0];
-
-      outEncrypted = {<<byte{result[AES_STATE_SIZE+1:(2*AES_STATE_SIZE)]}};
-      encryptValid = result[0][7:4];
-
-      if(encryptValid == 4'b1 && decryptValid == 4'b1)
-      begin
-        curTest = sentTests.pop_front();
-        expectEncrypted = curTest.encrypt;
-        expectDecrypted = curTest.plain;
-
-        assert (outEncrypted == expectEncrypted)
-          passCount++;
-        else
-        begin
-          $display("***Error: Encrypted output doesn't match expected");
-          $display("***       Encrypted output: %h", outEncrypted);
-          $display("***       Expected:         %h", expectEncrypted);
-          errorCount++;
-          $error;
-        end
-
-        assert (outDecrypted == expectDecrypted)
-          passCount++;
-        else
-        begin
-          $display("***Error: Decrypted output doesn't match expected");
-          $display("***       Decrypted output: %h", outDecrypted);
-          $display("***       Expected:         %h", expectDecrypted);
-          errorCount++;
-          $error;
-        end
-
-      end
-
-      if(eom_flag && (sentTests.size() == 0))
-          $finish;
-
-    end
-  endtask : run
-
-endclass : ScoreBoard;
-
 // Stimulus generation class
 // Read in plain text, key, and encrypted output from files
 class StimulusGeneration;
@@ -143,9 +71,9 @@ class StimulusGeneration;
       sentTests.push_back(test);
       
       // Convert the data to an array to send
-      foreach(dataSend[i])
+      foreach(dataSend[m])
       begin
-        dataSend[i] = test[$bits(test)-1:$bits(test)-8];
+        dataSend[m] = test[$bits(test)-1:$bits(test)-8];
         test = {test, 8'b0};
       end
 
@@ -161,17 +89,10 @@ class StimulusGeneration;
 endclass : StimulusGeneration
 
 module EncoderDecoderTestBench;
-  ScoreBoard scb;
   StimulusGeneration stim;
 
   task run();
   begin
-    fork
-    begin
-      scb.run();
-    end
-    join_none
-
     fork
     begin
       stim.run();
@@ -183,7 +104,6 @@ module EncoderDecoderTestBench;
   initial
   begin
     fork
-      scb = new();
       stim = new();
       $display("\nStarted at:"); $system("date");
       run();
@@ -193,10 +113,6 @@ module EncoderDecoderTestBench;
   final
   begin
     $display("\nEnded at:"); $system("date");
-    if(!errorCount)
-      $display("%0d tests passed sucessfully", passCount);
-    else
-      $display("%0d tests failed", errorCount);
   end
 
 endmodule : EncoderDecoderTestBench 

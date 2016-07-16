@@ -20,22 +20,29 @@ typedef struct packed {
 module Transactor;
 
 // Clock generation
+parameter CLOCK_WIDTH = 20;
+parameter CLOCK_CYCLE = CLOCK_WIDTH/2;
+parameter END_DELAY = (`NUM_ROUNDS+10)*CLOCK_WIDTH;
 logic clock = 0;
 //tbx clkgen inactive_negedge
 initial
 begin
 clock=0;
-forever #10 clock=~clock;
+forever #CLOCK_CYCLE clock=~clock;
 end
 
 // Reset generation
-logic reset = 1;
+logic globalReset = 1;
+logic localReset = 0;
+logic reset;
 //tbx clkgen
 initial
 begin
-  reset = 1;
-  #20 reset = 0;
+  globalReset = 1;
+  #CLOCK_WIDTH globalReset = 0;
 end
+
+assign reset = globalReset | localReset;
 
 // DUT Instantiation
 key_t inputKey;
@@ -45,21 +52,31 @@ logic encodeValid, decodeValid;
 AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt, encodeValid);
 AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeValid);
 
+// Assertions to check output
+property encodeCheck;
+  @(posedge clock)
+  disable iff(reset)
+  (encodeValid & (outputEncrypt == $past(encryptData,`NUM_ROUNDS))) | !encodeValid;
+endproperty
+
+p1: assert property(encodeCheck);
+
+property decodeCheck;
+  @(posedge clock)
+  disable iff(reset)
+  (decodeValid & (outputPlain == $past(plainData,`NUM_ROUNDS))) | !decodeValid;
+endproperty
+
+p2: assert property(decodeCheck);
+
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
                    .PAYLOAD_MAX_ELEMENTS(1),
                    .BUFFER_MAX_ELEMENTS(100)
                   ) inputpipe(clock);
 
-// Output Pipe Instantiation
-scemi_output_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+1),
-                    .PAYLOAD_MAX_ELEMENTS(1),
-                    .BUFFER_MAX_ELEMENTS(100)
-                  ) outputpipe(clock);
-
 //XRTL FSM to obtain operands from the HVL side
 inputTest_t testIn;
-outputResult_t testOut;
 bit eom = 0;
 logic [7:0] ne_valid = 0;
 
@@ -73,9 +90,6 @@ begin
   end
   else
   begin
-    testOut = {outputEncrypt, outputPlain, {3'b0, encodeValid}, {3'b0, decodeValid}};
-    outputpipe.send(1,testOut,eom);
-
     if(!eom)
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
@@ -83,6 +97,11 @@ begin
       plainData <= testIn.plain;
       encryptData <= testIn.encrypt;
       inputKey <= testIn.key;
+    end
+    else
+    begin
+      localReset = 1;
+      #END_DELAY $finish();
     end
   end
 end
