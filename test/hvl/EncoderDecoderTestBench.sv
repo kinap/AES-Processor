@@ -71,11 +71,7 @@ class StimulusGeneration;
       sentTests.push_back(test);
       
       // Convert the data to an array to send
-      foreach(dataSend[m])
-      begin
-        dataSend[m] = test[$bits(test)-1:$bits(test)-8];
-        test = {test, 8'b0};
-      end
+      dataSend = {>>byte{test}};
 
       driver.send_bytes(1, dataSend, 0);
     end
