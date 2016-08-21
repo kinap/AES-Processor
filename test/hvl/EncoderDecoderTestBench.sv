@@ -52,7 +52,7 @@ class StimulusGeneration;
   endfunction : new
 
   task run;
-    automatic byte unsigned dataSend[] = new[2*AES_STATE_SIZE+KEY_BYTES];
+    automatic byte unsigned dataSend[] = new[2*AES_STATE_SIZE+KEY_BYTES+1];
     while(!$feof(plain_file) && !$feof(encrypted_file) && !$feof(key_file))
     begin
       // Read in plain and encrypted data and key
@@ -65,6 +65,7 @@ class StimulusGeneration;
         continue;
       
       // Create a test and push it to the queue
+      test.testType = DIRECTED;
       test.plain = inData;
       test.encrypt = expected;
       test.key = keyData;

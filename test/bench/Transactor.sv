@@ -4,7 +4,10 @@
 
 import AESDefinitions::*;
 
+typedef enum byte { DIRECTED, SEEDED } TEST_TYPE;
+
 typedef struct packed {
+  TEST_TYPE testType;
   state_t plain;
   state_t encrypt;
   key_t key;
@@ -45,17 +48,19 @@ end
 assign reset = globalReset | localReset;
 
 // DUT Instantiation
+logic TestPhase = 0;
 key_t inputKey;
-state_t plainData, encryptData, outputEncrypt, outputPlain;
+state_t plainData, encryptData, outputEncrypt, outputPlain, inputEncryptData;
 logic encodeValid, decodeValid;
 
+assign inputEncryptData = (TestPhase == 0) ? encryptData : outputEncrypt;
 AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt, encodeValid);
-AESDecoder decoder(clock, reset, encryptData, inputKey, outputPlain, decodeValid);
+AESDecoder decoder(clock, reset, inputEncryptData, inputKey, outputPlain, decodeValid);
 
 // Assertions to check output
 property encodeCheck;
   @(posedge clock)
-  disable iff(reset)
+  disable iff(reset || TestPhase != 0)
   (encodeValid & (outputEncrypt == $past(encryptData,`NUM_ROUNDS))) | !encodeValid;
 endproperty
 
@@ -63,14 +68,14 @@ p1: assert property(encodeCheck);
 
 property decodeCheck;
   @(posedge clock)
-  disable iff(reset)
+  disable iff(reset || TestPhase != 0)
   (decodeValid & (outputPlain == $past(plainData,`NUM_ROUNDS))) | !decodeValid;
 endproperty
 
 p2: assert property(decodeCheck);
 
 // Input Pipe Instantiation
-scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES),
+scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES+1),
                    .PAYLOAD_MAX_ELEMENTS(1),
                    .BUFFER_MAX_ELEMENTS(100)
                   ) inputpipe(clock);
@@ -94,9 +99,12 @@ begin
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
       testIn = {<<byte{testIn}};
-      plainData <= testIn.plain;
-      encryptData <= testIn.encrypt;
-      inputKey <= testIn.key;
+      if(testIn.testType == DIRECTED)
+      begin
+        plainData <= testIn.plain;
+        encryptData <= testIn.encrypt;
+        inputKey <= testIn.key;
+      end
     end
     else
     begin
