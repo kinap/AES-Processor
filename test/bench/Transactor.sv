@@ -49,30 +49,54 @@ assign reset = globalReset | localReset;
 
 // DUT Instantiation
 logic TestPhase = 0;
-key_t inputKey;
+key_t inputKey, inputEncryptKey, encryptKey, bufferEncryptKey;
 state_t plainData, encryptData, outputEncrypt, outputPlain, inputEncryptData;
-logic encodeValid, decodeValid;
+logic encodeValid, decodeValid, bufReset;
 
 assign inputEncryptData = (TestPhase == 0) ? encryptData : outputEncrypt;
+assign inputEncryptKey = (TestPhase == 0) ? inputKey : bufferEncryptKey;
+assign decodeReset = (TestPhase == 0) ? reset : bufReset;
+key_t bufferedEncryptKeys[`NUM_ROUNDS+1];
+logic bufferedReset[`NUM_ROUNDS+1];
+assign bufferedEncryptKeys[0] = inputKey;
+assign bufferedReset[0] = reset;
+assign bufferEncryptKey = bufferedEncryptKeys[`NUM_ROUNDS];
+assign bufReset = bufferedReset[`NUM_ROUNDS];
+genvar j;
+generate
+  for(j = 1; j <= `NUM_ROUNDS; j++)
+  begin
+    Buffer #(key_t) KeyBuffer(clock, reset, bufferedEncryptKeys[j-1], bufferedEncryptKeys[j]);
+    Buffer #(logic) ResetBuffer(clock, 1'b0, bufferedReset[j-1], bufferedReset[j]);
+  end
+endgenerate
 AESEncoder encoder(clock, reset, plainData, inputKey, outputEncrypt, encodeValid);
-AESDecoder decoder(clock, reset, inputEncryptData, inputKey, outputPlain, decodeValid);
+AESDecoder decoder(clock, decodeReset, inputEncryptData, inputEncryptKey, outputPlain, decodeValid);
 
 // Assertions to check output
 property encodeCheck;
   @(posedge clock)
-  disable iff(reset || TestPhase != 0)
+  disable iff(reset || (TestPhase != 0))
   (encodeValid & (outputEncrypt == $past(encryptData,`NUM_ROUNDS))) | !encodeValid;
 endproperty
 
-p1: assert property(encodeCheck);
+p1: assert property(encodeCheck) else $display("%d\n%d\n%d",encodeValid,reset,TestPhase);
 
 property decodeCheck;
   @(posedge clock)
-  disable iff(reset || TestPhase != 0)
+  disable iff(reset || (TestPhase != 0))
   (decodeValid & (outputPlain == $past(plainData,`NUM_ROUNDS))) | !decodeValid;
 endproperty
 
 p2: assert property(decodeCheck);
+
+property encodeDecodeCheck;
+  @(posedge clock)
+  disable iff(reset || TestPhase != 1)
+  (decodeValid & (outputPlain == $past(plainData, 2*`NUM_ROUNDS))) | !decodeValid;
+endproperty
+
+p3: assert property(encodeDecodeCheck);
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES+1),
@@ -82,7 +106,10 @@ scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES+1),
 
 //XRTL FSM to obtain operands from the HVL side
 inputTest_t testIn;
+state_t tempData;
+key_t tempKey;
 bit eom = 0;
+int i = 0;
 logic [7:0] ne_valid = 0;
 
 always @(posedge clock)
@@ -98,12 +125,32 @@ begin
     if(!eom)
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
-      testIn = {<<byte{testIn}};
-      if(testIn.testType == DIRECTED)
+      if(!eom)
       begin
-        plainData <= testIn.plain;
-        encryptData <= testIn.encrypt;
-        inputKey <= testIn.key;
+        testIn = {<<byte{testIn}};
+        if(testIn.testType == DIRECTED)
+        begin
+          TestPhase = 0;
+          plainData <= testIn.plain;
+          encryptData <= testIn.encrypt;
+          inputKey <= testIn.key;
+        end
+        else if(testIn.testType == SEEDED)
+        begin
+          tempData = testIn.plain;
+          tempKey = testIn.key;
+          TestPhase = 1;
+          for(i=0; i<128; i=i+1)
+          begin
+            plainData <= tempData ^ (1<<i);
+            inputKey <= tempKey;
+            encryptKey <= tempKey;
+            repeat(1) @(posedge clock);
+          end
+          plainData <= tempData;
+          inputKey <= tempKey;
+          encryptKey <= tempKey;
+        end
       end
     end
     else

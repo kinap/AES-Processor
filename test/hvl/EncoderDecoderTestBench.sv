@@ -65,7 +65,8 @@ class StimulusGeneration;
         continue;
       
       // Create a test and push it to the queue
-      test.testType = DIRECTED;
+      //test.testType = DIRECTED;
+      test.testType = SEEDED;
       test.plain = inData;
       test.encrypt = expected;
       test.key = keyData;
