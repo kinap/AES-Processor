@@ -37,6 +37,7 @@ end
 // Reset generation
 logic globalReset = 1;
 logic localReset = 0;
+logic phaseReset = 0;
 logic reset;
 //tbx clkgen
 initial
@@ -61,7 +62,7 @@ logic bufferedReset[`NUM_ROUNDS+1];
 assign bufferedEncryptKeys[0] = inputKey;
 assign bufferedReset[0] = reset;
 assign bufferEncryptKey = bufferedEncryptKeys[`NUM_ROUNDS];
-assign bufReset = bufferedReset[`NUM_ROUNDS];
+assign bufReset = bufferedReset[`NUM_ROUNDS] | phaseReset;
 genvar j;
 generate
   for(j = 1; j <= `NUM_ROUNDS; j++)
@@ -92,7 +93,7 @@ p2: assert property(decodeCheck);
 
 property encodeDecodeCheck;
   @(posedge clock)
-  disable iff(reset || TestPhase != 1)
+  disable iff(reset || TestPhase != 1 || phaseReset)
   (decodeValid & (outputPlain == $past(plainData, 2*`NUM_ROUNDS))) | !decodeValid;
 endproperty
 
@@ -111,6 +112,8 @@ key_t tempKey;
 bit eom = 0;
 int i = 0;
 logic [7:0] ne_valid = 0;
+//TEST_TYPE lastPhase = DIRECTED;
+logic switchedPhase = 0;
 
 always @(posedge clock)
 begin
@@ -128,6 +131,14 @@ begin
       if(!eom)
       begin
         testIn = {<<byte{testIn}};
+        if((testIn.testType == SEEDED) && (switchedPhase == 0))
+        begin
+          TestPhase = 1;
+          switchedPhase = 1;
+          phaseReset = 1;
+          repeat(2) @(posedge clock);
+          phaseReset = 0;
+        end
         if(testIn.testType == DIRECTED)
         begin
           TestPhase = 0;
@@ -139,7 +150,6 @@ begin
         begin
           tempData = testIn.plain;
           tempKey = testIn.key;
-          TestPhase = 1;
           for(i=0; i<128; i=i+1)
           begin
             plainData <= tempData ^ (1<<i);

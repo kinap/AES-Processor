@@ -8,9 +8,9 @@ import AESTestDefinitions::*;
 import AESDefinitions::*;
 
 // File Handles
-int plain_file;
-int encrypted_file;
-int key_file;
+int plain_file, plain_file2;
+int encrypted_file, encrypted_file2;
+int key_file, key_file2;
 
 // Store sent data and expected encrypted output in a queue;
 inputTest_t sentTests [$];
@@ -48,6 +48,9 @@ class StimulusGeneration;
     plain_file = $fopen(plainFN, "rb");
     encrypted_file = $fopen(encryptFN, "rb");
     key_file = $fopen(keyFN, "rb");
+    plain_file2 = $fopen(plainFN, "rb");
+    encrypted_file2 = $fopen(encryptFN, "rb");
+    key_file2 = $fopen(keyFN, "rb");
   end
   endfunction : new
 
@@ -66,7 +69,30 @@ class StimulusGeneration;
       
       // Create a test and push it to the queue
       test.testType = DIRECTED;
-      //test.testType = SEEDED;
+      test.plain = inData;
+      test.encrypt = expected;
+      test.key = keyData;
+      sentTests.push_back(test);
+      
+      // Convert the data to an array to send
+      dataSend = {>>byte{test}};
+
+      driver.send_bytes(1, dataSend, 0);
+    end
+
+    while(!$feof(plain_file2) && !$feof(encrypted_file2) && !$feof(key_file2))
+    begin
+      // Read in plain and encrypted data and key
+      i = $fscanf(plain_file2, "%h", inData);
+      j = $fscanf(encrypted_file2, "%h", expected);
+      k = $fscanf(key_file2, "%h", keyData);
+
+      //Check if data is read in
+      if(i <= 0 && j <= 0 && k <= 0)
+        continue;
+      
+      // Create a test and push it to the queue
+      test.testType = SEEDED;
       test.plain = inData;
       test.encrypt = expected;
       test.key = keyData;
