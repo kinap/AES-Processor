@@ -4,22 +4,28 @@
 
 import AESDefinitions::*;
 
-module ExpandKey(input key_t key, output roundKeys_t roundKeys);
+// We are relying on AESEncoder/Decoder to never provide incorrect values for the params
+module ExpandKey #(parameter KEY_SIZE = 128,
+                   parameter NUM_ROUNDS = 10, 
+                   parameter KEY_BYTES = KEY_SIZE / 8,
+                   parameter type roundKeys_t = roundKey_t [0:NUM_ROUNDS], 
+                   parameter type key_t = logic [0:KEY_BYTES-1])
+
+(input key_t key, 
+output roundKeys_t roundKeys);
 
 localparam KEY_COL_SIZE = 4;
-
 localparam byte_t [KEY_COL_SIZE-1:0] RCON[12] = '{
     'h8d, 'h01, 'h02, 'h04, 'h08, 'h10, 
     'h20, 'h40, 'h80, 'h1b, 'h36, 'h6c
 };
 
-`ifdef AES_256
-    localparam NUM_KEY_EXP_ROUNDS = 8;
-`elsif AES_192
-    localparam NUM_KEY_EXP_ROUNDS = 9;
-`else
-    localparam NUM_KEY_EXP_ROUNDS = 11;
-`endif
+localparam NUM_KEY_EXP_ROUNDS =
+    (KEY_SIZE == 256)
+        ? 8
+        : (KEY_SIZE == 192)
+            ? 9
+            : 11;
 
 localparam KEY_NUM_COLS = KEY_BYTES / KEY_COL_SIZE;
 localparam ROUND_KEY_BITS = AES_STATE_SIZE * 8;
@@ -30,8 +36,8 @@ localparam ROUND_KEY_BITS = AES_STATE_SIZE * 8;
 // parameter is calculates the number of bits that the calculated key schedule needs to be shifted
 // right to produce correctly-aligned keys.
 // bit shift = (key width * # of expansion rounds + 1) - (round key width * # of cipher rounds +1)
-localparam KEY_SCH_SHIFT = (`KEY_SIZE * (NUM_KEY_EXP_ROUNDS+1)) - 
-                                (ROUND_KEY_BITS * (`NUM_ROUNDS+1));
+localparam KEY_SCH_SHIFT = (KEY_SIZE * (NUM_KEY_EXP_ROUNDS+1)) - 
+                                (ROUND_KEY_BITS * (NUM_ROUNDS+1));
 
 typedef byte_t [0:KEY_COL_SIZE-1] expKeyColumn_t;
 typedef expKeyColumn_t [0:KEY_NUM_COLS-1] expKeyBlock_t;
@@ -55,6 +61,7 @@ begin
 
 end
 
+// TODO
 `ifndef AES_256 // expanding a 128- or 192-bit key
 
     function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
