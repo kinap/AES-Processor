@@ -57,47 +57,44 @@ begin
     keyBlocks[0] = key;
 
     for (int j=1; j<=NUM_KEY_EXP_ROUNDS; ++j)
-        keyBlocks[j] = expandBlock(j, keyBlocks[j-1]);
+        if (KEY_SIZE == 256) 
+            keyBlocks[j] = expandBlock256(j, keyBlocks[j-1]);
+        else
+            keyBlocks[j] = expandBlock(j, keyBlocks[j-1]);
 
 end
 
-// TODO
-`ifndef AES_256 // expanding a 128- or 192-bit key
 
-    function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
+function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
 
-        expKeyBlock_t nextBlock;
+    expKeyBlock_t nextBlock;
 
-        nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
+    nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
 
-        for (int i=1; i<=(KEY_NUM_COLS-1); ++i)
-            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
+    for (int i=1; i<=(KEY_NUM_COLS-1); ++i)
+        nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
-        return nextBlock;
+    return nextBlock;
 
-    endfunction
+endfunction
 
-`else // Expanding a 256-bit key
+function automatic expKeyBlock_t expandBlock256(input integer round, expKeyBlock_t prevBlock);
 
-    function automatic expKeyBlock_t expandBlock(input integer round, expKeyBlock_t prevBlock);
+    expKeyBlock_t nextBlock;
 
-        expKeyBlock_t nextBlock;
+    nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
 
-        nextBlock[0] = prevBlock[0] ^ ApplyRcon(round, SubBytes_4(Rot(prevBlock[KEY_NUM_COLS-1])));
+    for (int i=1; i<=3; ++i)
+        nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
-        for (int i=1; i<=3; ++i)
-            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
+    nextBlock[4] = SubBytes_4(nextBlock[3]) ^ prevBlock[4];
 
-        nextBlock[4] = SubBytes_4(nextBlock[3]) ^ prevBlock[4];
+    for (int i=5; i<=7; ++i)
+        nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
 
-        for (int i=5; i<=7; ++i)
-            nextBlock[i] = nextBlock[i-1] ^ prevBlock[i];
+    return nextBlock;
 
-        return nextBlock;
-
-    endfunction
-
-`endif // `ifndef AES_256
+endfunction
 
 function automatic expKeyColumn_t ApplyRcon(input integer round, expKeyColumn_t in);
 
