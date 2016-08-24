@@ -4,9 +4,12 @@
 
 import AESDefinitions::*;
 
-module Counter #(parameter WIDTH = 8, RESET_VAL = `NUM_ROUNDS)
+// Reset value is equal to the number of rounds
+module Counter #(RESET_VAL = 10)
                 (input clock, reset,
                 output logic timeUp);
+
+localparam WIDTH = 8;
 
 logic [WIDTH-1:0] count;
 
