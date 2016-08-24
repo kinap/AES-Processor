@@ -6,7 +6,7 @@ import AESDefinitions::*;
 
 module AESEncoder #(parameter KEY_SIZE = 128, 
                     parameter KEY_BYTES = KEY_SIZE / 8, 
-                    parameter type key_t = logic [0:KEY_BYTES-1])
+                    parameter type key_t = byte_t [0:KEY_BYTES-1])
 
 (input logic clock, reset,
 input state_t in, key_t key,
@@ -59,7 +59,7 @@ endmodule : AESEncoder
 
 module AESDecoder #(parameter KEY_SIZE = 128, 
                     parameter KEY_BYTES = KEY_SIZE / 8, 
-                    parameter type key_t = logic [0:KEY_BYTES-1])
+                    parameter type key_t = byte_t [0:KEY_BYTES-1])
 
 (input logic clock, reset,
 input state_t in, key_t key,

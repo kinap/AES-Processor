@@ -9,7 +9,7 @@ module ExpandKey #(parameter KEY_SIZE = 128,
                    parameter NUM_ROUNDS = 10, 
                    parameter KEY_BYTES = KEY_SIZE / 8,
                    parameter type roundKeys_t = roundKey_t [0:NUM_ROUNDS], 
-                   parameter type key_t = logic [0:KEY_BYTES-1])
+                   parameter type key_t = byte_t [0:KEY_BYTES-1])
 
 (input key_t key, 
 output roundKeys_t roundKeys);
