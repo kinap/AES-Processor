@@ -157,6 +157,13 @@ begin
             encryptKey <= tempKey;
             repeat(1) @(posedge clock);
           end
+          for(i=0; i<128; i=i+1)
+          begin
+            plainData <= tempData ^ (1<<i);
+            inputKey <= ~tempKey;
+            encryptKey <= tempKey;
+            repeat(1) @(posedge clock);
+          end
           plainData <= tempData;
           inputKey <= tempKey;
           encryptKey <= tempKey;
