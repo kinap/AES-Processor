@@ -172,7 +172,7 @@ begin
           begin
             plainData <= tempData ^ (1<<i);
             inputKey <= ~tempKey;
-            encryptKey <= tempKey;
+            encryptKey <= ~tempKey;
             repeat(1) @(posedge clock);
           end
           plainData <= tempData;
