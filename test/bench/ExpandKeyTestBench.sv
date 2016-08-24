@@ -4,7 +4,16 @@
 
 import AESTestDefinitions::*;
 
-module ExpandKeyTestBench;
+module ExpandKeyTestBench #(parameter KEY_SIZE = 128, 
+                            parameter KEY_BYTES = KEY_SIZE / 8, 
+                            parameter NUM_ROUNDS = 10, 
+                            parameter type roundKeys_t = roundKey_t [0:NUM_ROUNDS], 
+                            parameter type key_t = logic [0:KEY_BYTES-1]);
+
+typedef struct packed {
+  key_t key;
+  roundKeys_t roundKeys;
+} expandedKeyTest_t;
 
 key_t key;
 roundKeys_t roundKeys;
@@ -18,7 +27,8 @@ ExpandKey mut(
 
 initial
 begin
-  KeyScheduleTester tester;
+  // TODO how do we want to test all key sizes?
+  KeyScheduleTester #(128) tester;
   tester = new();
   tester.ParseFileForTestCases("test/vectors/key_schedule_vectors.txt");
   
