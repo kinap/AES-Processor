@@ -15,7 +15,7 @@ typedef struct packed {
 
 module Transactor #(parameter KEY_SIZE = 128, 
                     parameter KEY_BYTES = KEY_SIZE / 8, 
-                    parameter type key_t = logic [0:KEY_BYTES-1]);
+                    parameter type key_t = byte_t [0:KEY_BYTES-1]);
 
 parameter NUM_ROUNDS =
   (KEY_SIZE == 256)

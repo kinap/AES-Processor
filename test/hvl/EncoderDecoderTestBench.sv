@@ -16,7 +16,7 @@ int key_file, key_file2;
 // Read in plain text, key, and encrypted output from files
 class StimulusGeneration #(parameter KEY_SIZE = 128, 
                            parameter KEY_BYTES = KEY_SIZE / 8, 
-                           parameter type key_t = logic [0:KEY_BYTES-1]);
+                           parameter type key_t = byte_t [0:KEY_BYTES-1]);
 
   scemi_dynamic_input_pipe driver;
 
