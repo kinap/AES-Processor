@@ -17,11 +17,6 @@
     roundKey_t roundKey;
   } keyTest_t;
 
-  typedef struct packed {
-    key_t key;
-    roundKeys_t roundKeys;
-  } expandedKeyTest_t;
-
   //***************************************************************************************//
   class UnitTester;
     test_t qTests[$];
@@ -220,16 +215,25 @@
   endclass : RoundTester
 
   //***************************************************************************************//
-  class KeyScheduleTester;
-    expandedKeyTest_t qTests[$];
+  class KeyScheduleTester #(parameter KEY_SIZE = 128, 
+                            parameter KEY_BYTES = KEY_SIZE / 8, 
+                            parameter type key_t = logic [0:KEY_BYTES-1]);
 
-    `ifdef AES_128
-    string vectorHeader = "AES_128";
-    `elsif AES_192
-    string vectorHeader = "AES_192";
-    `else
-    string vectorHeader = "AES_256";
-    `endif 
+    parameter NUM_ROUNDS =
+      (KEY_SIZE == 256)
+        ? 14
+        : (KEY_SIZE == 192)
+          ? 12
+          : 10;
+
+    parameter type roundKeys_t = roundKey_t [0:NUM_ROUNDS]; 
+
+    typedef struct packed {
+      key_t key;
+      roundKeys_t roundKeys;
+    } expandedKeyTest_t;
+
+    expandedKeyTest_t qTests[$];
 
     function void AddTestCase(key_t cipherKey, roundKeys_t roundKeys);
       expandedKeyTest_t newTest;
@@ -248,7 +252,7 @@
 
     function void Compare(expandedKeyTest_t curTest, roundKeys_t roundKeys);
 
-      for (int i=0; i<=`NUM_ROUNDS; ++i)
+      for (int i=0; i<=NUM_ROUNDS; ++i)
       begin
           
         KeySchedule_a: assert (curTest.roundKeys[i] == roundKeys[i])
@@ -269,9 +273,17 @@
       key_t key;
       roundKeys_t roundKeys;
       string header;
+      string vectorHeader;
       int i, file;
 
       file = $fopen(vectorFile, "r");
+
+      if (KEY_SIZE == 128)
+          vectorHeader = "AES_128";
+      else if (KEY_SIZE == 192)
+          vectorHeader = "AES_192";
+      else // KEY_SIZE == 256
+          vectorHeader = "AES_256";
 
       // advance file pointer to appropriate section header for key width
       i = $fscanf(file, "%s\n", header);

@@ -9,6 +9,9 @@ parameter CLOCK_CYCLE = 20ns;
 parameter CLOCK_WIDTH = CLOCK_CYCLE/2;
 parameter IDLE_CLOCKS = 2;
 
+// TODO how do we want to test multiple sizes here?
+parameter NUM_ROUNDS = 10;
+
 // Input and Output connections
 state_t in, inInv, in2, inInv2, out, outInv, out2, outInv2;
 roundKey_t key, key2, keyInv2;
@@ -19,8 +22,8 @@ BufferedRound Dut(clock, reset, in, key, out);
 BufferedRoundInverse Dut2(clock, reset, inInv, key, outInv);
 
 // Test last round as a special case
-BufferedRound #(`NUM_ROUNDS) Dut3(clock, reset, in2, key2, out2);
-BufferedRoundInverse #(`NUM_ROUNDS) Dut4(clock, reset, inInv2, keyInv2, outInv2);
+BufferedRound #(NUM_ROUNDS) Dut3(clock, reset, in2, key2, out2);
+BufferedRoundInverse #(NUM_ROUNDS) Dut4(clock, reset, inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;

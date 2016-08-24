@@ -7,26 +7,37 @@ import AESDefinitions::*;
 typedef enum byte { DIRECTED, SEEDED } TEST_TYPE;
 
 typedef struct packed {
-  TEST_TYPE testType;
-  state_t plain;
-  state_t encrypt;
-  key_t key;
-} inputTest_t;
-
-typedef struct packed {
   state_t encrypt;
   state_t plain;
   logic [3:0] encryptValid;
   logic [3:0] plainVlaid;
 } outputResult_t;
 
-module Transactor;
+module Transactor #(parameter KEY_SIZE = 128, 
+                    parameter KEY_BYTES = KEY_SIZE / 8, 
+                    parameter type key_t = logic [0:KEY_BYTES-1]);
+
+parameter NUM_ROUNDS =
+  (KEY_SIZE == 256)
+    ? 14
+    : (KEY_SIZE == 192)
+      ? 12
+      : 10;
 
 // Clock generation
 parameter CLOCK_WIDTH = 20;
 parameter CLOCK_CYCLE = CLOCK_WIDTH/2;
-parameter END_DELAY = (`NUM_ROUNDS+10)*CLOCK_WIDTH;
+parameter END_DELAY = (NUM_ROUNDS+10)*CLOCK_WIDTH;
+
+typedef struct packed {
+  TEST_TYPE testType;
+  state_t plain;
+  state_t encrypt;
+  key_t key;
+} inputTest_t;
+
 logic clock = 0;
+
 //tbx clkgen inactive_negedge
 initial
 begin
@@ -56,15 +67,15 @@ logic encodeValid, decodeValid, bufReset;
 assign inputEncryptData = (TestPhase == 0) ? encryptData : outputEncrypt;
 assign inputEncryptKey = (TestPhase == 0) ? inputKey : bufferEncryptKey;
 assign decodeReset = (TestPhase == 0) ? reset : bufReset;
-key_t bufferedEncryptKeys[`NUM_ROUNDS+1];
-logic bufferedReset[`NUM_ROUNDS+1];
+key_t bufferedEncryptKeys[NUM_ROUNDS+1];
+logic bufferedReset[NUM_ROUNDS+1];
 assign bufferedEncryptKeys[0] = inputKey;
 assign bufferedReset[0] = reset;
-assign bufferEncryptKey = bufferedEncryptKeys[`NUM_ROUNDS];
-assign bufReset = bufferedReset[`NUM_ROUNDS];
+assign bufferEncryptKey = bufferedEncryptKeys[NUM_ROUNDS];
+assign bufReset = bufferedReset[NUM_ROUNDS];
 genvar j;
 generate
-  for(j = 1; j <= `NUM_ROUNDS; j++)
+  for(j = 1; j <= NUM_ROUNDS; j++)
   begin
     Buffer #(key_t) KeyBuffer(clock, reset, bufferedEncryptKeys[j-1], bufferedEncryptKeys[j]);
     Buffer #(logic) ResetBuffer(clock, 1'b0, bufferedReset[j-1], bufferedReset[j]);
@@ -77,7 +88,7 @@ AESDecoder decoder(clock, decodeReset, inputEncryptData, inputEncryptKey, output
 property encodeCheck;
   @(posedge clock)
   disable iff(reset || (TestPhase != 0))
-  (encodeValid & (outputEncrypt == $past(encryptData,`NUM_ROUNDS))) | !encodeValid;
+  (encodeValid & (outputEncrypt == $past(encryptData,NUM_ROUNDS))) | !encodeValid;
 endproperty
 
 p1: assert property(encodeCheck) else $display("%d\n%d\n%d",encodeValid,reset,TestPhase);
@@ -85,7 +96,7 @@ p1: assert property(encodeCheck) else $display("%d\n%d\n%d",encodeValid,reset,Te
 property decodeCheck;
   @(posedge clock)
   disable iff(reset || (TestPhase != 0))
-  (decodeValid & (outputPlain == $past(plainData,`NUM_ROUNDS))) | !decodeValid;
+  (decodeValid & (outputPlain == $past(plainData,NUM_ROUNDS))) | !decodeValid;
 endproperty
 
 p2: assert property(decodeCheck);
@@ -93,7 +104,7 @@ p2: assert property(decodeCheck);
 property encodeDecodeCheck;
   @(posedge clock)
   disable iff(reset || TestPhase != 1)
-  (decodeValid & (outputPlain == $past(plainData, 2*`NUM_ROUNDS))) | !decodeValid;
+  (decodeValid & (outputPlain == $past(plainData, 2*NUM_ROUNDS))) | !decodeValid;
 endproperty
 
 p3: assert property(encodeDecodeCheck);

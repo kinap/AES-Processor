@@ -6,6 +6,9 @@ import AESTestDefinitions::*;
 
 module RoundTestBench();
 
+// TODO how do we want to test multiple sizes here?
+parameter NUM_ROUNDS = 10;
+
 // Input and Output connections
 state_t in, inInv, in2, inInv2, out, outInv, out2, outInv2;
 roundKey_t key, key2, keyInv2;
@@ -15,8 +18,8 @@ Round Dut(in, key, out);
 RoundInverse Dut2(inInv, key, outInv);
 
 // Test last round as a special case
-Round #(`NUM_ROUNDS) Dut3(in2, key2, out2);
-RoundInverse #(`NUM_ROUNDS) Dut4(inInv2, keyInv2, outInv2);
+Round #(NUM_ROUNDS) Dut3(in2, key2, out2);
+RoundInverse #(NUM_ROUNDS) Dut4(inInv2, keyInv2, outInv2);
 
 // Test execution and verification task
 keyTest_t curTest;

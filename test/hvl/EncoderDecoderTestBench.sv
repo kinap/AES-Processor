@@ -12,14 +12,24 @@ int plain_file;
 int encrypted_file;
 int key_file;
 
-// Store sent data and expected encrypted output in a queue;
-inputTest_t sentTests [$];
-int errorCount = 0, passCount = 0;
-
 // Stimulus generation class
 // Read in plain text, key, and encrypted output from files
-class StimulusGeneration;
+class StimulusGeneration #(parameter KEY_SIZE = 128, 
+                           parameter KEY_BYTES = KEY_SIZE / 8, 
+                           parameter type key_t = logic [0:KEY_BYTES-1]);
+
   scemi_dynamic_input_pipe driver;
+
+  typedef struct packed {
+    TEST_TYPE testType;
+    state_t plain;
+    state_t encrypt;
+    key_t key;
+  } inputTest_t;
+
+  // Store sent data and expected encrypted output in a queue;
+  inputTest_t sentTests [$];
+  int errorCount = 0, passCount = 0;
 
   // Variables to hold input data
   state_t inData, expected;
@@ -32,6 +42,7 @@ class StimulusGeneration;
   function new();
   begin
     driver = new("Transactor.inputpipe");
+    // TODO
     `ifdef AES_192
       plainFN = "test/vectors/plain_192.txt";
       encryptFN = "test/vectors/encrypted_192.txt";
