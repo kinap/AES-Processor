@@ -6,13 +6,6 @@ import AESDefinitions::*;
 
 typedef enum byte { DIRECTED, SEEDED } TEST_TYPE;
 
-typedef struct packed {
-  state_t encrypt;
-  state_t plain;
-  logic [3:0] encryptValid;
-  logic [3:0] plainVlaid;
-} outputResult_t;
-
 module Transactor #(parameter KEY_SIZE = 128, 
                     parameter KEY_BYTES = KEY_SIZE / 8, 
                     parameter type key_t = byte_t [0:KEY_BYTES-1]);
@@ -23,18 +16,30 @@ parameter NUM_ROUNDS =
     : (KEY_SIZE == 192)
       ? 12
       : 10;
+parameter KEY_BYTES_256 = 256 / 8;
 
 // Clock generation
 parameter CLOCK_WIDTH = 20;
 parameter CLOCK_CYCLE = CLOCK_WIDTH/2;
 parameter END_DELAY = (NUM_ROUNDS+10)*CLOCK_WIDTH;
 
+/* REMOVE
 typedef struct packed {
   TEST_TYPE testType;
   state_t plain;
   state_t encrypt;
   key_t key;
 } inputTest_t;
+*/
+typedef struct packed {
+  TEST_TYPE testType;
+  state_t plain;
+  key_t key;
+  state_t encrypt128;
+  state_t encrypt192;
+  state_t encrypt256;
+} inputTest_t;
+
 
 logic clock = 0;
 
@@ -111,7 +116,10 @@ endproperty
 p3: assert property(encodeDecodeCheck);
 
 // Input Pipe Instantiation
+/* REMOVE
 scemi_input_pipe #(.BYTES_PER_ELEMENT(2*AES_STATE_SIZE+KEY_BYTES+1),
+*/
+scemi_input_pipe #(.BYTES_PER_ELEMENT(4*AES_STATE_SIZE+KEY_BYTES_256+1),
                    .PAYLOAD_MAX_ELEMENTS(1),
                    .BUFFER_MAX_ELEMENTS(100)
                   ) inputpipe(clock);
@@ -154,7 +162,7 @@ begin
         begin
           TestPhase = 0;
           plainData <= testIn.plain;
-          encryptData <= testIn.encrypt;
+          encryptData <= testIn.encrypt128;
           inputKey <= testIn.key;
         end
         else if(testIn.testType == SEEDED)
