@@ -7,18 +7,27 @@
 //
 // Utilities
 //
-void open_files(struct file_h *handle)
+void open_files(int combined_file, struct file_h *handle)
 {
-    handle->pt_file = fopen(PT_FILENAME, "wb");
-    handle->ct_file = fopen(CT_FILENAME, "wb");
-    handle->key_file = fopen(KEY_FILENAME, "wb");
+    if (combined_file) {
+        handle->combined_file = fopen(COMBINED_FILENAME, "wb");
+        handle->pt_file = NULL;
+        handle->ct_file = NULL;
+        handle->key_file = NULL;
+    } else {
+        handle->combined_file = NULL; 
+        handle->pt_file = fopen(PT_FILENAME, "wb");
+        handle->ct_file = fopen(CT_FILENAME, "wb");
+        handle->key_file = fopen(KEY_FILENAME, "wb");
+    }
 }
 
 void close_files(struct file_h *handle)
 {
-    fclose(handle->pt_file);
-    fclose(handle->ct_file);
-    fclose(handle->key_file);
+    CLOSE_FILE(handle->pt_file);
+    CLOSE_FILE(handle->ct_file);
+    CLOSE_FILE(handle->key_file);
+    CLOSE_FILE(handle->combined_file);
 }
 
 void print_block(unsigned char *arr, int len)
@@ -96,40 +105,103 @@ int kat(int key_size, int num_rounds)
 // Generates a random plaintext of BLOCKSIZE, a random key of key_size, and an associated ciphertext.
 // Outputs to correct files
 //
-int generate_vector(struct file_h *handle, prng_state *prng, int key_size, int num_rounds)
+int generate_vector(struct file_h *handle, prng_state *prng, int key_size, int num_rounds, int combined)
 {
     int i;
-    unsigned char pt[BLOCKSIZE];
-    unsigned char ct[BLOCKSIZE];
-    unsigned char key[key_size];
     symmetric_key skey; // scheduled key
 
-    /* Generate random data */
-    yarrow_read(pt, sizeof(pt), prng);
-    yarrow_read(key, sizeof(key), prng);
-    // 0 ct    
+    if (!combined) {
+        unsigned char pt[BLOCKSIZE];
+        unsigned char ct[BLOCKSIZE];
+        unsigned char key[key_size];
 
-    /* setup variant */
-    aes_setup(key, key_size, num_rounds, &skey);
+        /* Generate random data */
+        yarrow_read(pt, sizeof(pt), prng);
+        yarrow_read(key, sizeof(key), prng);
 
-    /* encrypt plaintext */
-    aes_ecb_encrypt(pt, ct, &skey);
+        /* setup variant */
+        aes_setup(key, key_size, num_rounds, &skey);
 
-    /* done, clear key schedule */
-    aes_done(&skey);
+        /* encrypt plaintext */
+        aes_ecb_encrypt(pt, ct, &skey);
 
-    /* write our data to file */
-    for (i = 0; i < BLOCKSIZE; i ++) 
-        fprintf(handle->pt_file, "%02x", pt[i]);
-    fputc(0xa, handle->pt_file);
+        /* done, clear key schedule */
+        aes_done(&skey);
 
-    for (i = 0; i < BLOCKSIZE; i ++) 
-        fprintf(handle->ct_file, "%02x", ct[i]);
-    fputc(0xa, handle->ct_file);
+        /* write our data to file */
+        for (i = 0; i < BLOCKSIZE; i ++) 
+            fprintf(handle->pt_file, "%02x", pt[i]);
+        fputc(0xa, handle->pt_file);
 
-    for (i = 0; i < key_size; i ++) 
-        fprintf(handle->key_file, "%02x", key[i]);
-    fputc(0xa, handle->key_file);
+        for (i = 0; i < BLOCKSIZE; i ++) 
+            fprintf(handle->ct_file, "%02x", ct[i]);
+        fputc(0xa, handle->ct_file);
+
+        for (i = 0; i < key_size; i ++) 
+            fprintf(handle->key_file, "%02x", key[i]);
+        fputc(0xa, handle->key_file);
+
+    } else {
+
+        unsigned char pt128[BLOCKSIZE];
+
+        unsigned char ct128[BLOCKSIZE];
+        unsigned char ct192[BLOCKSIZE];
+        unsigned char ct256[BLOCKSIZE];
+
+        /* smaller keys are substrings of the 256 key */
+        unsigned char key256[KEYSIZE_256];
+
+        /* Generate random data */
+        yarrow_read(pt128, sizeof(pt128), prng);
+        yarrow_read(key256, sizeof(key256), prng);
+
+        /************************************/
+
+        // 256
+        aes_setup(key256, KEYSIZE_256, ROUNDS_256, &skey);
+        aes_ecb_encrypt(pt128, ct256, &skey);
+        aes_done(&skey);
+
+        // 192 
+        aes_setup(key256, KEYSIZE_192, ROUNDS_192, &skey);
+        aes_ecb_encrypt(pt128, ct192, &skey);
+        aes_done(&skey);
+
+        // 128
+        aes_setup(key256, KEYSIZE_128, ROUNDS_128, &skey);
+        aes_ecb_encrypt(pt128, ct128, &skey);
+        aes_done(&skey);
+
+        /************************************/
+        /* write our data to file           */
+
+        /* plaintext */
+        for (i = 0; i < BLOCKSIZE; i++) 
+            fprintf(handle->combined_file, "%02x", pt128[i]);
+        fputc(0x20, handle->combined_file); // space character
+
+        /* 256-bit key */
+        for (i = 0; i < KEYSIZE_256; i++) 
+            fprintf(handle->combined_file, "%02x", key256[i]);
+        fputc(0x20, handle->combined_file); // space character
+
+        /* separate ciphertexts */
+        for (i = 0; i < BLOCKSIZE; i++) 
+            fprintf(handle->combined_file, "%02x", ct128[i]);
+        fputc(0x20, handle->combined_file); // space character
+
+        for (i = 0; i < BLOCKSIZE; i++) 
+            fprintf(handle->combined_file, "%02x", ct192[i]);
+        fputc(0x20, handle->combined_file); // space character
+
+        for (i = 0; i < BLOCKSIZE; i++) 
+            fprintf(handle->combined_file, "%02x", ct256[i]);
+        fputc(0x20, handle->combined_file); // space character
+        fputc(0xa, handle->combined_file); // newline
+
+
+    }
 
     return EXIT_SUCCESS;
 }
@@ -150,6 +222,7 @@ int main(int argc, char **argv)
     args.kat = 0;
     args.num_vectors = 1;
     args.variant = AES_128;
+    args.combined = 1;
 
     argp_parse(&argp, argc, argv, 0, 0, &args);
 
@@ -171,29 +244,31 @@ int main(int argc, char **argv)
     }
 
     /* select keysize */
-    if (args.variant == AES_256) {
+    if (args.combined) {
+        // nop
+    } else if (args.variant == AES_256) {
         key_size = KEYSIZE_256;
-        num_rounds = 14;
+        num_rounds = ROUNDS_256;
     } else if (args.variant == AES_192) {
         key_size = KEYSIZE_192;
-        num_rounds = 12;
-    } else { // AES_128
+        num_rounds = ROUNDS_192;
+    } else { // if (args.variant == AES_128) { 
         key_size = KEYSIZE_128;
-        num_rounds = 10;
+        num_rounds = ROUNDS_128;
     }
 
     /* generate test vectors */
     if (args.kat) {
         kat(key_size, num_rounds);
     } else {
-        open_files(&handle);
+        open_files(args.combined, &handle);
         for (i = 0; i < args.num_vectors; i++) 
             // TODO segault - compile with tomfastmath?
             //if (yarrow_add_entropy(seed, sizeof(seed), &prng) != CRYPT_OK) {
             //    printf("Error adding entropy.\n");
             //    return EXIT_FAILURE;
             //}
-            generate_vector(&handle, &prng, key_size, num_rounds);
+            generate_vector(&handle, &prng, key_size, num_rounds, args.combined);
         close_files(&handle);
     }
 
