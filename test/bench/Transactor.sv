@@ -245,11 +245,10 @@ endproperty
 
 decodeEncode_256: assert property(encodeDecodeCheck_256);
 
-
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(4*AES_STATE_SIZE+KEY_BYTES_256+1),
                    .PAYLOAD_MAX_ELEMENTS(1),
-                   .BUFFER_MAX_ELEMENTS(100)
+                   .BUFFER_MAX_ELEMENTS(50)
                   ) inputpipe(clock);
 
 //XRTL FSM to obtain operands from the HVL side
