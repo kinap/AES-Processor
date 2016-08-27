@@ -6,7 +6,7 @@ Alex Pearson, Scott Lawson, Daniel Collins
 
 ### Description
 
-Parameterized AES encryptor and decryptor written in System Verilog. Supports the three standardized key sizes (128 bits, 192 bits, and 256 bits), chosen at compile time. Adheres to the Advanced Encryption Standard (AES) published by the National Institute of Standards and Technology (NIST), AES FIPS PUB 197. Verified using test vectors provided by the standard and produced by the [LibTomCrypt C library](https://github.com/libtom/libtomcrypt). Verification done in simulation with [Mentor Graphics ModelSim&reg;](https://www.mentor.com/products/fv/modelsim/) and emulation on the [Mentor Graphics Veloce&reg;](https://www.mentor.com/products/fv/emulation-systems/).
+Parameterized AES encryptor and decryptor written in System Verilog. Supports the three standardized key sizes (128 bits, 192 bits, and 256 bits), chosen at elaboration time. Adheres to the Advanced Encryption Standard (AES) published by the National Institute of Standards and Technology (NIST), AES FIPS PUB 197. Verified using test vectors provided by the standard and produced by the [LibTomCrypt C library](https://github.com/libtom/libtomcrypt). Verification done in simulation with [Mentor Graphics ModelSim&reg;](https://www.mentor.com/products/fv/modelsim/) and emulation on the [Mentor Graphics Veloce&reg;](https://www.mentor.com/products/fv/emulation-systems/).
 
 ### Repository Contents
 
@@ -36,9 +36,6 @@ All of the recipes in the provided Makefile assume the user is on a Linux system
 
 ##### Options
 
-**KEY_WIDTH**  
-Specifies the key width to compile/simulate for. Valid widths are 128, 192, and 256. This option must be specified at compile time in order to run simulates for a key width besides 128. Has no effect during simulation, only during compilation. If unspecified, default is 128.
-
 **MODE**  
 Specifies the simulation mode. Valid modes are:
 
@@ -57,7 +54,7 @@ If simulating for any mode besides puresim, this option must be specified for bo
     make sim_expandkey
     
     # compile all modules configured for a 256-bit key, run MixColumns testbench in standard mode
-    make compile KEY_WIDTH=256 MODE=standard
+    make compile MODE=standard
     make sim_mixcolumns MODE=standard
 
     # compile all modules and testbenches for all key widths and run all testbenches on the Veloce emulator

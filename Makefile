@@ -1,22 +1,10 @@
 #
 # Makefile for AES Encryptor/Decryptor Project
-# ECE 571 SP2016
 #
 
 #MODE ?= standard
 MODE ?= puresim
 #MODE ?= veloce
-
-KEY_WIDTH ?= 128
-ifeq ($(KEY_WIDTH),128)
-    KEY_WIDTH_MACRO := AES_128
-else ifeq ($(KEY_WIDTH),192)
-    KEY_WIDTH_MACRO := AES_192
-else ifeq ($(KEY_WIDTH),256)
-    KEY_WIDTH_MACRO := AES_256
-else
-    $(error "Invalid key width specified")
-endif
 
 SRC_DIR ?= src
 TST_DIR ?= test/bench
@@ -72,10 +60,10 @@ endif # Compiling either for Veloce or Veloce puresim
 endif
 
 sim_subbytes:
-	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS) 
+	$(SIMULATE_CMD) SubBytesTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_shiftrows:
-	$(SIMULATE_CMD) ShiftRowsTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS) 
+	$(SIMULATE_CMD) ShiftRowsTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_mixcolumns:
 	$(SIMULATE_CMD) MixColumnsTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
@@ -101,18 +89,16 @@ define check_log
        @grep $(1) $(ALL_LOG) > /dev/null;  \
                if [ $$? -eq 0 ]; then printf $(2); else printf $(3); fi;
 endef
+
 PRINT_BAR = "\n***********************************************"
 
 all:
 	$(MAKE) clean 
 	
-	@for WIDTH in 128 192 256 ; do	\
-		printf $(PRINT_BAR) | tee -a $(ALL_LOG); \
-		printf "\n\tAES-$$WIDTH" | tee -a $(ALL_LOG) ; \
-		printf $(PRINT_BAR) | tee -a $(ALL_LOG); \
-		printf "\n" | tee -a $(ALL_LOG); \
-		$(MAKE) compile KEY_WIDTH=$$WIDTH | tee -a $(ALL_LOG) ; \
-		$(MAKE) $(SIM_TARGETS) | tee -a $(ALL_LOG) ; done
+	printf $(PRINT_BAR) | tee -a $(ALL_LOG); \
+	printf "\n" | tee -a $(ALL_LOG); \
+	$(MAKE) compile | tee -a $(ALL_LOG) ; \
+	$(MAKE) $(SIM_TARGETS) | tee -a $(ALL_LOG) ;
 
 	@printf "\n\n"; printf $(PRINT_BAR); printf "\nLog file: $(ALL_LOG)\n"
 	$(call check_log,"Errors: [1-9]","\nExecution Errors:\tYES","\nExecution Errors:\tNo")
