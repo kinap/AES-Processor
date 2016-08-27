@@ -7,12 +7,14 @@ import AESDefinitions::*;
 module SubBytes(input state_t in,
                 output state_t out);
 
-//byte_t sbox[0:255];
+`ifdef INFER_RAM
+byte_t sbox[0:255];
 
-//initial
-//begin
-//  $readmemh("./src/mem/Sbox.mem", sbox);
-//end
+initial
+begin
+  $readmemh("./src/mem/Sbox.mem", sbox);
+end
+`endif
 
 always_comb
   begin
@@ -21,8 +23,11 @@ always_comb
     // and low parts of the input byte are used as the indices of the 2D LUT
     for(int i = 0; i < 16; i++)
     begin
+      `ifdef INFER_RAM
+      out[i] = sbox[(in[i][7:4]*16) + in[i][3:0]];
+      `else
       out[i] = sbox[in[i][7:4]][in[i][3:0]];
-      //out[i] = sbox[(in[i][7:4]*16) + in[i][3:0]];
+      `endif
     end
     `ifdef DEBUG
       $display("%m");
@@ -35,12 +40,14 @@ endmodule
 module SubBytesInverse(input state_t in,
                        output state_t out);
 
-//byte_t invSbox[0:255];
+`ifdef INFER_RAM
+byte_t invSbox[0:255];
 
-//initial
-//begin
-//  $readmemh("./src/mem/InvSbox.mem", invSbox);
-//end
+initial
+begin
+  $readmemh("./src/mem/InvSbox.mem", invSbox);
+end
+`endif
 
 always_comb
   begin
@@ -50,8 +57,11 @@ always_comb
     // LUT
     for(int i = 0; i < 16; i++)
     begin
+      `ifdef INFER_RAM
+      out[i] = invSbox[(in[i][7:4]*16) + in[i][3:0]];
+      `else
       out[i] = invSbox[in[i][7:4]][in[i][3:0]];
-      //out[i] = invSbox[(in[i][7:4]*16) + in[i][3:0]];
+      `endif
     end
     `ifdef DEBUG
       $display("%m");

@@ -17,6 +17,8 @@ import AESDefinitions::byte_t;
 // implementing these as memories to optimize for the emulation environment.
 //
 
+`ifndef INFER_RAM
+
 parameter byte_t GfMultLut2[256] =
 '{8'h00,8'h02,8'h04,8'h06,8'h08,8'h0a,8'h0c,8'h0e,8'h10,8'h12,8'h14,8'h16,8'h18,8'h1a,8'h1c,8'h1e,
   8'h20,8'h22,8'h24,8'h26,8'h28,8'h2a,8'h2c,8'h2e,8'h30,8'h32,8'h34,8'h36,8'h38,8'h3a,8'h3c,8'h3e,
@@ -125,30 +127,7 @@ parameter byte_t GfMultLut14[256] =
   8'h37,8'h39,8'h2b,8'h25,8'h0f,8'h01,8'h13,8'h1d,8'h47,8'h49,8'h5b,8'h55,8'h7f,8'h71,8'h63,8'h6d,
   8'hd7,8'hd9,8'hcb,8'hc5,8'hef,8'he1,8'hf3,8'hfd,8'ha7,8'ha9,8'hbb,8'hb5,8'h9f,8'h91,8'h83,8'h8d};
 
-// Multiplication functions used in Rijndael
-function automatic byte_t GfMult2Lut(input byte_t a);
-  return GfMultLut2[a];
-endfunction
-
-function automatic byte_t GfMult3Lut(input byte_t a);
-  return GfMultLut3[a];
-endfunction
-
-function automatic byte_t GfMult9Lut(input byte_t a);
-  return GfMultLut9[a];
-endfunction
-
-function automatic byte_t GfMult11Lut(input byte_t a);
-  return GfMultLut11[a];
-endfunction
-
-function automatic byte_t GfMult13Lut(input byte_t a);
-  return GfMultLut13[a];
-endfunction
-
-function automatic byte_t GfMult14Lut(input byte_t a);
-  return GfMultLut14[a];
-endfunction
+`endif // `ifndef INFER_RAM
 
 endpackage : GaloisFieldFunctions
 

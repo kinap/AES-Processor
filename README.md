@@ -47,15 +47,23 @@ Specifies the simulation mode. Valid modes are:
 
 If simulating for any mode besides puresim, this option must be specified for both compilation and simulation. If unspecified, default is puresim.
 
+**INFER_RAM**
+Specifies whether to infer RAMs for the SBox (KeyExpansion and Subbytes) and GF LUTs (MixColumns).
+
+| Infer RAMs ||
+|------------|---
+| y          | Yes, infer RAMs for the SBox and GFLUT memories.
+| n          | No, do not infer RAMs for the SBox and GFLUT memories.
+
 ##### Examples
 
-    # compiles all modules configured for a 128-bit key, run ExpandKey testbench in puresim mode
+    # compile all modules, run ExpandKey testbench in puresim mode
     make compile
     make sim_expandkey
     
-    # compile all modules configured for a 256-bit key, run MixColumns testbench in standard mode
-    make compile MODE=standard
-    make sim_mixcolumns MODE=standard
+    # compile all modules with inferred RAMs, run top level HVL testbench in veloce mode
+    make compile MODE=veloce INFER_RAM=y
+    make sim_encoderdecoder MODE=veloce
 
     # compile all modules and testbenches for all key widths and run all testbenches on the Veloce emulator
     make all MODE=veloce

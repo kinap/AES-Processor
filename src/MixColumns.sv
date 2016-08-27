@@ -17,6 +17,27 @@ import GaloisFieldFunctions::*;
 module MixColumns(input state_t in, 
                  output state_t out);
 
+`ifdef INFER_RAM
+
+byte_t GfMultLut2[0:255];
+byte_t GfMultLut3[0:255];
+
+initial
+begin
+  $readmemh("./src/mem/GfMult2Lut.mem", GfMultLut2);
+  $readmemh("./src/mem/GfMult3Lut.mem", GfMultLut3);
+end
+`endif
+
+// Multiplication functions used in Rijndael
+function automatic byte_t GfMult2Lut(input byte_t a);
+  return GfMultLut2[a];
+endfunction
+
+function automatic byte_t GfMult3Lut(input byte_t a);
+  return GfMultLut3[a];
+endfunction
+
 always_comb
   begin
 
@@ -45,6 +66,38 @@ endmodule
 //
 module MixColumnsInverse(input state_t in,
                         output state_t out);
+
+`ifdef INFER_RAM
+
+byte_t GfMultLut9[0:255];
+byte_t GfMultLut11[0:255];
+byte_t GfMultLut13[0:255];
+byte_t GfMultLut14[0:255];
+
+initial
+begin
+ $readmemh("./src/mem/GfMult9Lut.mem", GfMultLut9);
+ $readmemh("./src/mem/GfMult11Lut.mem", GfMultLut11);
+ $readmemh("./src/mem/GfMult13Lut.mem", GfMultLut13);
+ $readmemh("./src/mem/GfMult14Lut.mem", GfMultLut14);
+end
+`endif
+
+function automatic byte_t GfMult9Lut(input byte_t a);
+  return GfMultLut9[a];
+endfunction
+
+function automatic byte_t GfMult11Lut(input byte_t a);
+  return GfMultLut11[a];
+endfunction
+
+function automatic byte_t GfMult13Lut(input byte_t a);
+  return GfMultLut13[a];
+endfunction
+
+function automatic byte_t GfMult14Lut(input byte_t a);
+  return GfMultLut14[a];
+endfunction
 
 always_comb
   begin

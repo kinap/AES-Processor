@@ -6,12 +6,17 @@
 MODE ?= puresim
 #MODE ?= veloce
 
+INFER_RAM ?= n
+
 SRC_DIR ?= src
 TST_DIR ?= test/bench
 HVL_DIR ?= test/hvl
 
 COMPILE_CMD = vlog
 COMPILE_FLAGS = -mfcu 
+ifeq ($(INFER_RAM),y)
+COMPILE_FLAGS += +define+INFER_RAM
+endif
 
 SIMULATE_CMD = vsim
 
@@ -43,14 +48,14 @@ compile:
 	vmap work $(MODE)work
 
 ifeq ($(MODE),standard) # Compiling in standard mode: no Veloce dependencies
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) $(SRC_FILES) $(TST_FILES)
 
 else # Compiling either for Veloce, or Veloce puresim
 	$(COMPILE_CMD) -f $(VMW_HOME)/tbx/questa/hdl/scemi_pipes_sv_files.f
-	$(COMPILE_CMD) $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
+	$(COMPILE_CMD) $(COMPILE_FLAGS) $(SRC_FILES) $(TST_FILES) $(HVL_FILES)
 
 ifeq ($(MODE),veloce) # Compiling for puresim
-	velanalyze $(COMPILE_FLAGS) +define+$(KEY_WIDTH_MACRO) $(SRC_FILES) $(TST_DIR)/Transactor.sv
+	velanalyze $(COMPILE_FLAGS) $(SRC_FILES) $(TST_DIR)/Transactor.sv
 	velcomp -top Transactor
 	velcp -o criticalpath.txt -cfgDir ./veloce.med
 
