@@ -47,13 +47,15 @@ Specifies the simulation mode. Valid modes are:
 
 If simulating for any mode besides puresim, this option must be specified for both compilation and simulation. If unspecified, default is puresim.
 
-**INFER_RAM**
+**INFER_RAM**  
 Specifies whether to infer RAMs for the SBox (KeyExpansion and Subbytes) and GF LUTs (MixColumns).
 
 | Infer RAMs ||
 |------------|---
 | y          | Yes, infer RAMs for the SBox and GFLUT memories.
 | n          | No, do not infer RAMs for the SBox and GFLUT memories.
+
+This option is off by default. If it is used, the Transactor must be modified to remove instantiation of the 256-bit encoder and 256-bit decoder. The entire design will not fit on one board, which is all our Veloce has. The design is limited by the crystal chips used when inferring RAMs.
 
 ##### Examples
 
