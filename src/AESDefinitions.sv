@@ -15,6 +15,12 @@ package AESDefinitions;
   typedef byte_t [0:AES_STATE_SIZE-1] state_t;
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
 
+  
+  //
+  // NOTE: we used to infer these as memories (like you should), but ran into
+  // limits on the number of crystals in the Veloce emulator. So we are
+  // implementing these as memories to optimize for the emulation environment.
+  //
   parameter logic [0:15][0:15][7:0] sbox =
   { { 8'h63, 8'h7C, 8'h77, 8'h7B, 8'hF2, 8'h6B, 8'h6F, 8'hC5, 8'h30, 8'h01, 8'h67, 8'h2B, 8'hFE, 8'hD7, 8'hAB, 8'h76 },
     { 8'hCA, 8'h82, 8'hC9, 8'h7D, 8'hFA, 8'h59, 8'h47, 8'hF0, 8'hAD, 8'hD4, 8'hA2, 8'hAF, 8'h9C, 8'hA4, 8'h72, 8'hC0 },
