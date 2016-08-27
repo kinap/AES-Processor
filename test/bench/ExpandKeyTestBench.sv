@@ -28,7 +28,7 @@ ExpandKey mut(
 initial
 begin
   // TODO how do we want to test all key sizes?
-  KeyScheduleTester #(128) tester;
+  KeyScheduleTester #(KEY_SIZE) tester;
   tester = new();
   tester.ParseFileForTestCases("test/vectors/key_schedule_vectors.txt");
   

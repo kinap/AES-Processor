@@ -215,18 +215,13 @@
   endclass : RoundTester
 
   //***************************************************************************************//
-  class KeyScheduleTester #(parameter KEY_SIZE = 128, 
-                            parameter KEY_BYTES = KEY_SIZE / 8, 
-                            parameter type key_t = byte_t [0:KEY_BYTES-1]);
-
-    parameter NUM_ROUNDS =
-      (KEY_SIZE == 256)
-        ? 14
-        : (KEY_SIZE == 192)
-          ? 12
-          : 10;
-
-    parameter type roundKeys_t = roundKey_t [0:NUM_ROUNDS]; 
+  class KeyScheduleTester #(int KEY_SIZE = 128,
+                            int KEY_BYTES = KEY_SIZE /8,
+                            type key_t = byte_t [0:KEY_BYTES-1],
+                            int NUM_ROUNDS = ((KEY_SIZE == 256) ? 14 : 
+                                              (KEY_SIZE == 192) ? 12 :
+                                                                  10),
+                            type roundKeys_t = roundKey_t [0:NUM_ROUNDS]); 
 
     typedef struct packed {
       key_t key;
