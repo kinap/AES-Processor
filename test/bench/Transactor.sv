@@ -148,29 +148,58 @@ state_t plainData, encryptData_128, inputEncryptData_128, outputEncrypt_128, out
                    encryptData_192, inputEncryptData_192, outputEncrypt_192, outputPlain_192,
                    encryptData_256, inputEncryptData_256, outputEncrypt_256, outputPlain_256;
 
-logic encodeValid_128, decodeValid_128,
-      encodeValid_192, decodeValid_192,
-      encodeValid_256, decodeValid_256;
+state_t outputPlain2_128, outputEncrypt2_128,
+        outputPlain2_192, outputEncrypt2_192,
+        outputPlain2_256, outputEncrypt2_256;
+
+logic encodeValid_128, decodeValid_128, encodeValid2_128, decodeValid2_128,
+      encodeValid_192, decodeValid_192, encodeValid2_192, decodeValid2_192,
+      encodeValid_256, decodeValid_256, encodeValid2_256, decodeValid2_256;
 
 assign inputEncryptData_128 = (testPhase == 0) ? encryptData_128 : outputEncrypt_128;
 assign inputEncryptData_192 = (testPhase == 0) ? encryptData_192 : outputEncrypt_192;
 assign inputEncryptData_256 = (testPhase == 0) ? encryptData_256 : outputEncrypt_256;
 
+// KEY SIZE = 128, Encoder -> Decoder
 AESEncoder #(128) encoder_128(clock, reset, plainData, inputKey_128, outputEncrypt_128, 
                               encodeValid_128);
 AESDecoder #(128) decoder_128(clock, decodeReset_128, inputEncryptData_128, encryptKey_128, 
                               outputPlain_128, decodeValid_128);
+
+// KEY SIZE = 128, Decoder -> Encoder
+AESDecoder #(128) decoder2_128(clock, reset, encryptData_128, inputKey_128, outputPlain2_128,
+                              decodeValid2_128);
+AESEncoder #(128) encoder2_128(clock, decodeReset_128, outputPlain2_128, encryptKey_128,
+                              outputEncrypt2_128, encodeValid2_128);
+
+// KEY SIZE = 192, Encoder -> Decoder
 AESEncoder #(192) encoder_192(clock, reset, plainData, inputKey_192, outputEncrypt_192,
                               encodeValid_192);
 AESDecoder #(192) decoder_192(clock, decodeReset_192, inputEncryptData_192, encryptKey_192,
                               outputPlain_192, decodeValid_192);
+
+// KEY SIZE = 192, Decoder -> Encoder
+AESDecoder #(192) decoder2_192(clock, reset, encryptData_192, inputKey_192, outputPlain2_192,
+                              decodeValid2_192);
+AESEncoder #(192) encoder2_192(clock, decodeReset_192, outputPlain2_192, encryptKey_192,
+                              outputEncrypt2_192, encodeValid2_192);
+
+// KEY SIZE = 256, Encoder -> Decoder
 AESEncoder #(256) encoder_256(clock, reset, plainData, inputKey_256, outputEncrypt_256,
                               encodeValid_256);
 AESDecoder #(256) decoder_256(clock, decodeReset_256, inputEncryptData_256, encryptKey_256,
                               outputPlain_256, decodeValid_256);
 
+// KEY SIZE = 256, Decoder -> Encoder
+AESDecoder #(256) decoder2_256(clock, reset, encryptData_256, inputKey_256, outputPlain2_256,
+                              decodeValid2_256);
+AESEncoder #(256) encoder2_256(clock, decodeReset_256, outputPlain2_256, encryptKey_256,
+                              outputEncrypt2_256, encodeValid2_256);
+
 /** Assertions to Check Output **/
 // KEY SIZE = 128
+
+// Directed Assertions
 property encodeCheck_128;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
@@ -187,15 +216,27 @@ endproperty
 
 decode_128: assert property(decodeCheck_128);
 
+// Encoder -> Decoder Assertion
 property encodeDecodeCheck_128;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
   (decodeValid_128 & (outputPlain_128 == $past(plainData, 2*NUM_ROUNDS_128))) | !decodeValid_128;
 endproperty
 
-decodeEncode_128: assert property(encodeDecodeCheck_128);
+encodeDecode_128: assert property(encodeDecodeCheck_128);
+
+// Decoder -> Encoder Assertion
+property decodeEncodeCheck_128;
+  @(posedge clock)
+  disable iff(reset || testPhase != 1 || phaseReset)
+  (encodeValid2_128 & (outputEncrypt2_128 == $past(encryptData_128, 2*NUM_ROUNDS_128))) | !encodeValid2_128;
+endproperty
+
+decodeEndoce_128: assert property(decodeEncodeCheck_128);
 
 // KEY SIZE = 192
+
+// Directed Assertions
 property encodeCheck_192;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
@@ -212,6 +253,7 @@ endproperty
 
 decode_192: assert property(decodeCheck_192);
 
+// Encoder -> Decoder Assertion
 property encodeDecodeCheck_192;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
@@ -220,7 +262,18 @@ endproperty
 
 decodeEncode_192: assert property(encodeDecodeCheck_192);
 
+// Decoder -> Encoder Assertion
+property decodeEncodeCheck_192;
+  @(posedge clock)
+  disable iff(reset || testPhase != 1 || phaseReset)
+  (encodeValid2_192 & (outputEncrypt2_192 == $past(encryptData_192, 2*NUM_ROUNDS_192))) | !encodeValid2_192;
+endproperty
+
+decodeEndoce_192: assert property(decodeEncodeCheck_192);
+
 // KEY SIZE = 256
+
+// Directed Assertions
 property encodeCheck_256;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
@@ -237,6 +290,7 @@ endproperty
 
 decode_256: assert property(decodeCheck_256);
 
+// Encoder -> Decoder Assertion
 property encodeDecodeCheck_256;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
@@ -244,6 +298,15 @@ property encodeDecodeCheck_256;
 endproperty
 
 decodeEncode_256: assert property(encodeDecodeCheck_256);
+
+// Decoder -> Encoder Assertion
+property decodeEncodeCheck_256;
+  @(posedge clock)
+  disable iff(reset || testPhase != 1 || phaseReset)
+  (encodeValid2_256 & (outputEncrypt2_256 == $past(encryptData_256, 2*NUM_ROUNDS_256))) | !encodeValid2_256;
+endproperty
+
+decodeEndoce_256: assert property(decodeEncodeCheck_256);
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(4*AES_STATE_SIZE+KEY_BYTES_256+1),
@@ -253,10 +316,10 @@ scemi_input_pipe #(.BYTES_PER_ELEMENT(4*AES_STATE_SIZE+KEY_BYTES_256+1),
 
 //XRTL FSM to obtain operands from the HVL side
 inputTest_t testIn;
-state_t tempData;
+state_t tempData, tempEncrypt128, tempEncrypt192, tempEncrypt256;
 key256_t tempKey;
 bit eom = 0;
-int i = 0;
+int i = 0, i2 = 0, i3 = 0;
 logic [7:0] ne_valid = 0;
 logic switchedPhase = 0;
 
@@ -277,7 +340,6 @@ begin
     if(!eom)
     begin
       inputpipe.receive(1,ne_valid,testIn,eom);
-      //TODO: Invert data and keys to generate more test cases.
       if(!eom)
       begin
         testIn = {<<byte{testIn}};
@@ -303,24 +365,39 @@ begin
         else if(testIn.testType == SEEDED)
         begin
           tempData = testIn.plain;
+          tempEncrypt128 = testIn.encrypt128;
+          tempEncrypt192 = testIn.encrypt192;
+          tempEncrypt256 = testIn.encrypt256;
           tempKey = testIn.key;
-          for(i=0; i<128; i=i+1)
+          for(i3=0; i3<2; i3=i3+1)
           begin
-            plainData <= tempData ^ (1<<i);
-            inputKey_128 <= tempKey[0:KEY_BYTES_128-1];
-            inputKey_192 <= tempKey[0:KEY_BYTES_192-1];
-            inputKey_256 <= tempKey;
-            repeat(1) @(posedge clock);
-          end
-          for(i=0; i<128; i=i+1)
-          begin
-            plainData <= tempData ^ (1<<i);
-            inputKey_128 <= ~tempKey[0:KEY_BYTES_128-1];
-            inputKey_192 <= ~tempKey[0:KEY_BYTES_192-1];
-            inputKey_256 <= ~tempKey;
-            repeat(1) @(posedge clock);
+            if(i3==1)
+            begin
+              tempData = ~tempData;
+            end
+            for(i2=0; i2<2; i2=i2+1)
+            begin
+              if(i2==1)
+              begin
+                tempKey = ~tempKey;
+              end
+              for(i=0; i<128; i=i+1)
+              begin
+                plainData <= tempData ^ (1<<i);
+                encryptData_128 <= tempEncrypt128 ^ (1<<i);
+                encryptData_192 <= tempEncrypt192 ^ (1<<i);
+                encryptData_256 <= tempEncrypt256 ^ (1<<i);
+                inputKey_128 <= tempKey[0:KEY_BYTES_128-1];
+                inputKey_192 <= tempKey[0:KEY_BYTES_192-1];
+                inputKey_256 <= tempKey;
+                repeat(1) @(posedge clock);
+              end
+            end
           end
           plainData <= tempData;
+          encryptData_128 <= tempEncrypt128;
+          encryptData_192 <= tempEncrypt192;
+          encryptData_256 <= tempEncrypt256;
           inputKey_128 <= tempKey[0:KEY_BYTES_128-1];
           inputKey_192 <= tempKey[0:KEY_BYTES_192-1];
           inputKey_256 <= tempKey;
