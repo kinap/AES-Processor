@@ -17,6 +17,11 @@
     roundKey_t roundKey;
   } keyTest_t;
 
+  typedef struct packed {
+    roundKey_t prevKey;
+    roundKey_t roundKey;
+  } keyRoundTest_t;
+
   //***************************************************************************************//
   class UnitTester;
     test_t qTests[$];
@@ -135,6 +140,112 @@
   endclass : UnitKeyTester
 
   //***************************************************************************************//
+  class KeyRoundTester;
+    keyRoundTest_t qTests[$];
+
+    function void AddTestCase(roundKey_t prevKey, roundKey_t roundKey);
+      keyRoundTest_t newTest;
+      $cast(newTest.prevKey, prevKey);
+      $cast(newTest.roundKey, roundKey);
+      qTests.push_back(newTest);
+      `ifdef DEBUG_TEST
+        $display("KeyRoundTester.AddTestCase");
+        $display("Prev Key: %h", prevKey);
+        $display("Round Key: %h", roundKey);
+      `endif
+    endfunction : AddTestCase
+
+    function keyRoundTest_t GetNextTest();
+      return qTests.pop_front();
+    endfunction : GetNextTest
+
+    function int NumTests();
+      return qTests.size();
+    endfunction : NumTests
+
+    function void Compare(roundKey_t actual, keyRoundTest_t curTest);
+      AddRoundKey_a: assert (actual == curTest.roundKey)
+      else
+      begin
+        $display("*** Error: Current output doesn't match expected");
+        $display("***        Key:      %h", curTest.prevKey);
+        $display("***        RoundKey: %h", actual);
+        $display("***        Expected: %h", curTest.roundKey);
+        $error;
+      end
+    endfunction : Compare
+
+    // this function is really gross. I'd rather outsource text file parsing to pearl or python.
+    function void ParseFileForTestCases(string testFile, string phaseString, integer KEY_SIZE);
+      roundKey_t firstFound, secondFound, tmp;
+      string parseString, tempString;
+      string vectorHeader, header;
+      int i, file;
+      bit first_parse = 1;
+
+      file = $fopen(testFile, "r");
+
+      if (KEY_SIZE == 128)
+          vectorHeader = "AES_128";
+      else if (KEY_SIZE == 192)
+          vectorHeader = "AES_192";
+      else // KEY_SIZE == 256
+          vectorHeader = "AES_256";
+
+      // advance file pointer to appropriate section header for key width
+      i = $fscanf(file, "%s\n", header);
+      while (!$feof(file) && vectorHeader.icompare(header) != 0)
+        i = $fscanf(file, "%s\n", header);
+
+
+      // i'm not proud of what follows
+      while(!$feof(file))
+      begin
+        // search for occurance of k_sch
+        i = $fscanf(file, "%s %h\n", parseString, firstFound);
+        // if we hit an empty line, stop.
+        if (firstFound == "")
+            break;
+
+        tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+
+        // if found, it is saved as firstFound already
+        if(tempString.icompare(phaseString) == 0)
+        begin
+
+          // first time through file, read two keys
+          if (first_parse)
+          begin
+              while(first_parse)
+              begin
+                  // search again to find expected answer
+                  i = $fscanf(file, "%s %h\n", parseString, secondFound);
+                  tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
+
+                  // if found, it is saved as secondFound already
+                  if(tempString.icompare(phaseString) == 0)
+                  begin
+                    AddTestCase(.prevKey(firstFound), .roundKey(secondFound));
+                    first_parse = 0;
+                  end
+              end
+          end
+          // subsequent times through file, read 1 key, use last read key as
+          // starting point
+          else
+          begin
+            tmp = firstFound;
+            firstFound = secondFound;
+            secondFound = tmp;
+            AddTestCase(.prevKey(firstFound), .roundKey(secondFound));
+          end
+        end
+      end 
+    endfunction : ParseFileForTestCases
+
+  endclass : KeyRoundTester
+
+  //***************************************************************************************//
   class RoundTester;
     keyTest_t qTests[$];
 
@@ -213,92 +324,6 @@
     endfunction : ParseFileForTestCases
 
   endclass : RoundTester
-
-  //***************************************************************************************//
-  class KeyScheduleTester #(int KEY_SIZE = 128,
-                            int KEY_BYTES = KEY_SIZE /8,
-                            type key_t = byte_t [0:KEY_BYTES-1],
-                            int NUM_ROUNDS = ((KEY_SIZE == 256) ? 14 : 
-                                              (KEY_SIZE == 192) ? 12 :
-                                                                  10),
-                            type roundKeys_t = roundKey_t [0:NUM_ROUNDS]); 
-
-    typedef struct packed {
-      key_t key;
-      roundKeys_t roundKeys;
-    } expandedKeyTest_t;
-
-    expandedKeyTest_t qTests[$];
-
-    function void AddTestCase(key_t cipherKey, roundKeys_t roundKeys);
-      expandedKeyTest_t newTest;
-      newTest.key = cipherKey;
-      newTest.roundKeys = roundKeys;
-      qTests.push_back(newTest);
-    endfunction : AddTestCase
-
-    function expandedKeyTest_t GetNextTest();
-      return qTests.pop_front();
-    endfunction : GetNextTest
-
-    function int NumTests();
-      return qTests.size();
-    endfunction : NumTests
-
-    function void Compare(expandedKeyTest_t curTest, roundKeys_t roundKeys);
-
-      for (int i=0; i<=NUM_ROUNDS; ++i)
-      begin
-          
-        KeySchedule_a: assert (curTest.roundKeys[i] == roundKeys[i])
-        else
-        begin
-          $display("***      Error: Round key doesn't match expected");
-          $display("***      Round:\t%0d", i);
-          $display("*** Cipher Key:\t%h", curTest.key);
-          $display("***   Expected:\t%h", curTest.roundKeys[i]);
-          $display("***     Actual:\t%h", roundKeys[i]);
-          $error;
-        end
-
-      end
-    endfunction : Compare
-
-    function void ParseFileForTestCases(string vectorFile);
-      key_t key;
-      roundKeys_t roundKeys;
-      string header;
-      string vectorHeader;
-      int i, file;
-
-      file = $fopen(vectorFile, "r");
-
-      if (KEY_SIZE == 128)
-          vectorHeader = "AES_128";
-      else if (KEY_SIZE == 192)
-          vectorHeader = "AES_192";
-      else // KEY_SIZE == 256
-          vectorHeader = "AES_256";
-
-      // advance file pointer to appropriate section header for key width
-      i = $fscanf(file, "%s\n", header);
-      while (!$feof(file) && vectorHeader.icompare(header) != 0)
-        i = $fscanf(file, "%s\n", header);
-        
-      while(!$feof(file))
-      begin
-        i = $fscanf(file, "%h %h\n", key, roundKeys);
-        if (i < 2)
-          break;
-
-        AddTestCase(key, roundKeys);
-      end 
-
-      $fclose(file);
-
-    endfunction : ParseFileForTestCases
-
-  endclass : KeyScheduleTester
 
   endpackage : AESTestDefinitions
 

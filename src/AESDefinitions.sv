@@ -12,14 +12,14 @@ package AESDefinitions;
   // Byte-oriented AES "State"
   // Byte indices 0-3 are the first column, 4-7 are the second column, etc.
   typedef logic [7:0] byte_t;
+  typedef byte_t [0:3] dword_t;
   typedef byte_t [0:AES_STATE_SIZE-1] state_t;
   typedef byte_t [0:AES_STATE_SIZE-1] roundKey_t;
-
   
   //
   // NOTE: we used to infer these as memories (like you should), but ran into
   // limits on the number of crystals in the Veloce emulator. So we are
-  // implementing these as memories to optimize for the emulation environment.
+  // implementing these as logic to optimize for the emulation environment.
   //
 
   `ifndef INFER_RAM

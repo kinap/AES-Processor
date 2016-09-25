@@ -88,8 +88,8 @@ sim_round:
 sim_bufferedround:
 	$(SIMULATE_CMD) BufferedRoundTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
-sim_expandkey:
-	$(SIMULATE_CMD) ExpandKeyTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
+sim_keyexpansion:
+	$(SIMULATE_CMD) KeyExpansionTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
 sim_encoderdecoder:
 ifneq ($(MODE),standard)
