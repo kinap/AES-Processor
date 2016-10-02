@@ -17,11 +17,6 @@
     roundKey_t roundKey;
   } keyTest_t;
 
-  typedef struct packed {
-    roundKey_t prevKey;
-    roundKey_t roundKey;
-  } keyRoundTest_t;
-
   //***************************************************************************************//
   class UnitTester;
     test_t qTests[$];
@@ -140,18 +135,29 @@
   endclass : UnitKeyTester
 
   //***************************************************************************************//
-  class KeyRoundTester;
+  class KeyRoundTester #(parameter KEY_SIZE = 128,
+                         parameter KEY_BYTES = KEY_SIZE / 8,
+                         parameter type key_t = byte_t [0:KEY_BYTES-1]);
+
+    typedef struct packed {
+      roundKey_t prevKey;
+      roundKey_t roundKey;
+      key_t key;
+    } keyRoundTest_t;
+
     keyRoundTest_t qTests[$];
 
-    function void AddTestCase(roundKey_t prevKey, roundKey_t roundKey);
+    function void AddTestCase(roundKey_t prevKey, roundKey_t roundKey, key_t key);
       keyRoundTest_t newTest;
       $cast(newTest.prevKey, prevKey);
       $cast(newTest.roundKey, roundKey);
+      $cast(newTest.key, key);
       qTests.push_back(newTest);
       `ifdef DEBUG_TEST
         $display("KeyRoundTester.AddTestCase");
         $display("Prev Key: %h", prevKey);
         $display("Round Key: %h", roundKey);
+        $display("initial: %h", key);
       `endif
     endfunction : AddTestCase
 
@@ -175,36 +181,34 @@
       end
     endfunction : Compare
 
-    // this function is really gross. I'd rather outsource text file parsing to pearl or python.
     function void ParseFileForTestCases(string testFile, string phaseString, integer KEY_SIZE);
       roundKey_t firstFound, secondFound, tmp;
-      string parseString, tempString;
-      string vectorHeader, header;
+      string parseString, tempString, initialKey;
+      string vectorHeader;
       int i, file;
       bit first_parse = 1;
 
       file = $fopen(testFile, "r");
 
       if (KEY_SIZE == 128)
-          vectorHeader = "AES_128";
+          vectorHeader = "AES-128";
       else if (KEY_SIZE == 192)
-          vectorHeader = "AES_192";
+          vectorHeader = "AES-192";
       else // KEY_SIZE == 256
-          vectorHeader = "AES_256";
+          vectorHeader = "AES-256";
 
       // advance file pointer to appropriate section header for key width
-      i = $fscanf(file, "%s\n", header);
-      while (!$feof(file) && vectorHeader.icompare(header) != 0)
-        i = $fscanf(file, "%s\n", header);
-
+      while($fscanf(file, "%s", parseString) && parseString != vectorHeader);
+        // get initial key
+        i = $fscanf(file, "%s %h\n", "KEY", initialKey);
 
       // i'm not proud of what follows
       while(!$feof(file))
       begin
         // search for occurance of k_sch
         i = $fscanf(file, "%s %h\n", parseString, firstFound);
-        // if we hit an empty line, stop.
-        if (firstFound == "")
+        // key size delimeter
+        if (parseString == "****")
             break;
 
         tempString = parseString.substr(parseString.len()-5, parseString.len()-1);
@@ -225,19 +229,18 @@
                   // if found, it is saved as secondFound already
                   if(tempString.icompare(phaseString) == 0)
                   begin
-                    AddTestCase(.prevKey(firstFound), .roundKey(secondFound));
+                    AddTestCase(.prevKey(firstFound), .roundKey(secondFound), .key(initialKey));
                     first_parse = 0;
                   end
               end
           end
-          // subsequent times through file, read 1 key, use last read key as
-          // starting point
+          // subsequent times through file, read 1 key, use last read key as the starting point
           else
           begin
             tmp = firstFound;
             firstFound = secondFound;
             secondFound = tmp;
-            AddTestCase(.prevKey(firstFound), .roundKey(secondFound));
+            AddTestCase(.prevKey(firstFound), .roundKey(secondFound), .key(initialKey));
           end
         end
       end 
