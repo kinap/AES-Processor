@@ -17,6 +17,12 @@ COMPILE_FLAGS = -mfcu
 ifeq ($(INFER_RAM),y)
 COMPILE_FLAGS += +define+INFER_RAM
 endif
+ifeq ($(RUN_128),y)
+COMPILE_FLAGS += +define+NO_RUN_192 +define+NO_RUN_256
+endif
+ifeq ($(RUN_192),y)
+COMPILE_FLAGS += +define+NO_RUN_256
+endif
 
 SIMULATE_CMD = vsim
 

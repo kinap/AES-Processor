@@ -6,6 +6,14 @@ import AESDefinitions::*;
 
 typedef enum byte { DIRECTED, SEEDED } TEST_TYPE;
 
+`ifndef NO_RUN_192
+  `define RUN_192
+`endif
+
+`ifndef NO_RUN_256
+  `define RUN_256
+`endif
+
 module Transactor;
 
 parameter KEY_BYTES_128 = 128 / 8;
@@ -127,6 +135,8 @@ generate
   end
 endgenerate
 
+
+`ifdef RUN_192
 genvar p;
 generate
   for(p = 1; p <= NUM_ROUNDS_192; p++)
@@ -134,7 +144,9 @@ generate
     Buffer #(key192_t) KeyBuffer(clock, reset, bufferedEncryptKeys_192[p-1], bufferedEncryptKeys_192[p]);
   end
 endgenerate
+`endif
 
+`ifdef RUN_256
 genvar q;
 generate
   for(q = 1; q <= NUM_ROUNDS_256; q++)
@@ -142,6 +154,7 @@ generate
     Buffer #(key256_t) KeyBuffer(clock, reset, bufferedEncryptKeys_256[q-1], bufferedEncryptKeys_256[q]);
   end
 endgenerate
+`endif
 
 /** DUT Instantiation **/
 state_t plainData, encryptData_128, inputEncryptData_128, outputEncrypt_128, outputPlain_128,
@@ -172,6 +185,7 @@ AESDecoder #(128) decoder2_128(clock, reset, encryptData_128, inputKey_128, outp
 AESEncoder #(128) encoder2_128(clock, decodeReset_128, outputPlain2_128, encryptKey_128,
                               outputEncrypt2_128, encodeValid2_128);
 
+`ifdef RUN_192
 // KEY SIZE = 192, Encoder -> Decoder
 AESEncoder #(192) encoder_192(clock, reset, plainData, inputKey_192, outputEncrypt_192,
                               encodeValid_192);
@@ -183,7 +197,9 @@ AESDecoder #(192) decoder2_192(clock, reset, encryptData_192, inputKey_192, outp
                               decodeValid2_192);
 AESEncoder #(192) encoder2_192(clock, decodeReset_192, outputPlain2_192, encryptKey_192,
                               outputEncrypt2_192, encodeValid2_192);
+`endif
 
+`ifdef RUN_256
 // KEY SIZE = 256, Encoder -> Decoder
 AESEncoder #(256) encoder_256(clock, reset, plainData, inputKey_256, outputEncrypt_256,
                               encodeValid_256);
@@ -195,6 +211,7 @@ AESDecoder #(256) decoder2_256(clock, reset, encryptData_256, inputKey_256, outp
                               decodeValid2_256);
 AESEncoder #(256) encoder2_256(clock, decodeReset_256, outputPlain2_256, encryptKey_256,
                               outputEncrypt2_256, encodeValid2_256);
+`endif
 
 /** Assertions to Check Output **/
 // KEY SIZE = 128
@@ -267,6 +284,7 @@ endproperty
 decodeEncodeDiffEncrypted_128: assert property(decoderEncoderEncrypted_128);
 
 // KEY SIZE = 192
+`ifdef RUN_192
 
 // Directed Assertions
 property encodeCheck_192;
@@ -334,8 +352,10 @@ property decoderEncoderEncrypted_192;
 endproperty
 
 decodeEncodeDiffEncrypted_192: assert property(decoderEncoderEncrypted_192);
+`endif
 
 // KEY SIZE = 256
+`ifdef RUN_256
 
 // Directed Assertions
 property encodeCheck_256;
@@ -403,6 +423,7 @@ property decoderEncoderEncrypted_256;
 endproperty
 
 decodeEncodeDiffEncrypted_256: assert property(decoderEncoderEncrypted_256);
+`endif
 
 // Input Pipe Instantiation
 scemi_input_pipe #(.BYTES_PER_ELEMENT(4*AES_STATE_SIZE+KEY_BYTES_256+1),
