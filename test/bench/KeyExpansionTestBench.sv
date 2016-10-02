@@ -4,16 +4,22 @@
 
 import AESTestDefinitions::*;
 
-// TODO how do we want to test all key sizes?
-module KeyExpansionTestBench #(parameter KEY_SIZE = 192, 
-                               parameter KEY_BYTES = KEY_SIZE / 8,
-                               parameter type key_t = byte_t [0:KEY_BYTES-1]);
-parameter NUM_ROUNDS =
-  (KEY_SIZE == 256)
-    ? 14
-    : (KEY_SIZE == 192)
-      ? 12
-      : 10;
+module KeyExpansionTestBench;
+
+    KeyExp_keysize #(.KEY_SIZE(128)) key_exp_128();   
+    KeyExp_keysize #(.KEY_SIZE(192)) key_exp_192();   
+    KeyExp_keysize #(.KEY_SIZE(256)) key_exp_256();   
+
+endmodule
+    
+  
+// 
+// TB for 1 keysize at a time
+//
+module KeyExp_keysize #(parameter KEY_SIZE = 128,
+                        parameter KEY_BYTES = KEY_SIZE / 8,
+                        parameter NUM_ROUNDS = (KEY_SIZE == 256) ? 14 : (KEY_SIZE == 192) ? 12 : 10,
+                        parameter type key_t = byte_t [0:KEY_BYTES-1]);
 
 parameter CLOCK_CYCLE = 20ns;
 parameter CLOCK_WIDTH = CLOCK_CYCLE/2;
@@ -25,21 +31,15 @@ typedef struct packed {
   key_t key;
 } keyRoundTest_t;
 
-key_t roundIn[NUM_ROUNDS];
-key_t roundOut[NUM_ROUNDS];
-roundKey_t tmp;
-//roundKey_t roundKey [NUM_ROUNDS];
-logic clock, reset;
-
 keyRoundTest_t curTest;
+
+key_t key;
+roundKey_t [0:NUM_ROUNDS] roundKeys;
+
+logic clock, reset;
 int idx = 0;
 
-// each key round has a unique rcon value, so we must instantiate them separately
-genvar i;
-for (i = 1; i <= NUM_ROUNDS; i++)
-begin
-  KeyRound #(.KEY_SIZE(KEY_SIZE), .RCON_ITER(i)) mut(clock, reset, roundIn[i-1], roundOut[i-1]);
-end
+KeyExpansion #(KEY_SIZE) key_exp(clock, reset, key, roundKeys);
 
 // Create a free running clock
 initial
@@ -56,6 +56,7 @@ begin
     reset = `FALSE;
 end
 
+// test entry
 initial
 begin
   KeyRoundTester #(KEY_SIZE) tester;
@@ -64,26 +65,24 @@ begin
   repeat(IDLE_CLOCKS) @(negedge clock);
 
   tester.ParseFileForTestCases("test/vectors/fips_example_vectors.txt", "k_sch", KEY_SIZE);
+
+  curTest = tester.GetNextTest();
+  key = curTest.key; // stabalize key at input, let it trickle down to the rounds
+  repeat(NUM_ROUNDS+1) @(negedge clock);
+  idx += 1;
+  tester.Compare(roundKeys[idx], curTest);
   
   while(tester.NumTests() != 0)
   begin
     curTest = tester.GetNextTest();
-    roundIn[0] = curTest.key;
-    $display("****** IN : %0d, %h", idx, roundIn[idx]);
-
+    key = curTest.key; // stabalize key at input, let it trickle down to the rounds
     repeat(1) @(negedge clock);
-    //#1 repeat(1);
-
-    $display("****** OUT: %0d, %h", idx, roundOut[idx]);
-    tmp = {roundIn[idx][KEY_BYTES-8 +: 8], roundOut[idx][0 +: 8]};
-    $display("****** RK : %0d, %h", idx, tmp);
-
-    tester.Compare(tmp, curTest);
     idx += 1;
-    roundIn[idx] = roundOut[idx-1];
+    tester.Compare(roundKeys[idx], curTest);
   end
 
-  $finish();
+  if (KEY_SIZE == 256)
+    $finish();
 end
 
 endmodule

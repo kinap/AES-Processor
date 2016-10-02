@@ -174,8 +174,8 @@
       else
       begin
         $display("*** Error: Current output doesn't match expected");
-        $display("***        Key:      %h", curTest.prevKey);
-        $display("***        RoundKey: %h", actual);
+        $display("***        Prev Key: %h", curTest.prevKey);
+        $display("***        Actual  : %h", actual);
         $display("***        Expected: %h", curTest.roundKey);
         $error;
       end

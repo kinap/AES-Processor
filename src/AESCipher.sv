@@ -22,8 +22,8 @@ parameter NUM_ROUNDS =
 
 typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
 
-state_t roundOutput[NUM_ROUNDS+1];
-roundKeys_t roundKeyOutput[NUM_ROUNDS+1];
+state_t roundOutput[0:NUM_ROUNDS];
+roundKeys_t roundKeys;
 
 //
 // Module instantiations
@@ -32,23 +32,18 @@ roundKeys_t roundKeyOutput[NUM_ROUNDS+1];
 // counter for valid signal
 Counter #(NUM_ROUNDS) validCounter(clock, reset, encodeValid);
 
-// Key expansion block - outside the rounds
-ExpandKey #(KEY_SIZE, NUM_ROUNDS, KEY_BYTES, roundKeys_t, key_t) keyExpBlock (key, roundKeyOutput[0]);
+// Key expansion block - internally pipelined
+KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
 
-// First round - add key only
-AddRoundKey firstRound(in, roundKeyOutput[0][0], roundOutput[0]);
-
-//
-// Round generation loop
-//
+// First round - add original key only
+AddRoundKey firstRound(in, roundKeys[0], roundOutput[0]);
 
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
 generate
   for(i = 1; i <= NUM_ROUNDS; i++)
     begin
-      BufferedRound #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][i], roundOutput[i]);
-      Buffer #(roundKeys_t) KeyBuffer(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
+      BufferedRound #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeys[i], roundOutput[i]);
     end
 endgenerate
 
@@ -75,8 +70,8 @@ parameter NUM_ROUNDS =
 
 typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
 
-state_t roundOutput[NUM_ROUNDS+1];
-roundKeys_t roundKeyOutput[NUM_ROUNDS+1];
+state_t roundOutput[0:NUM_ROUNDS];
+roundKeys_t roundKeys;
 
 //
 // Module instantiations
@@ -85,11 +80,11 @@ roundKeys_t roundKeyOutput[NUM_ROUNDS+1];
 // counter for valid signal
 Counter #(NUM_ROUNDS) validCounter(clock, reset, decodeValid);
 
-// Key expansion block - outside the rounds
-ExpandKey #(KEY_SIZE, NUM_ROUNDS, KEY_BYTES, roundKeys_t, key_t) keyExpBlock (key, roundKeyOutput[0]);
+// Key expansion block - internally pipelined
+KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKeyOutput[0][NUM_ROUNDS], roundOutput[0]);
+AddRoundKey firstRound(in, roundKeys[0], roundOutput[0]);
 
 //
 // Round generation loop
@@ -100,8 +95,7 @@ genvar i;
 generate
   for(i = 1; i <= NUM_ROUNDS; i++)
     begin
-      BufferedRoundInverse #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][NUM_ROUNDS-i], roundOutput[i]);
-      Buffer #(roundKeys_t) KeyBuffer(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
+      BufferedRoundInverse #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeys[i], roundOutput[i]);
     end
 endgenerate
 
