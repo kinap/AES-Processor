@@ -104,6 +104,7 @@ module SubKeyGen #(parameter KEY_SIZE = 128,
 (input key_t prevSubKey, int rcon_iter, output key_t nextSubKey);
 
     int keyIdx;
+    dword_t tmp;
 
     `ifdef INFER_RAM
     byte_t sbox[0:255];
@@ -118,7 +119,9 @@ module SubKeyGen #(parameter KEY_SIZE = 128,
         /* copy last 4B of previous block */
         nextSubKey[0:3] = prevSubKey[KEY_BYTES-4:KEY_BYTES-1];
         /* perform core on the 4B block */
-        nextSubKey[0:3] = schedule_core (nextSubKey[0:3], rcon_iter);
+        // WA for veloce compiler... doesn't like nextSubKey[0:3] being passed to the function and being updated by it
+        tmp = nextSubKey[0:3]; 
+        nextSubKey[0:3] = schedule_core (tmp, rcon_iter);
         /* XOR with first 4B */
         nextSubKey[0:3] ^= prevSubKey[0:3];
 
