@@ -14,7 +14,7 @@ module KeyExpansion #(parameter KEY_SIZE = 128,
     key_t subKey[NUM_ROUNDS+1];
 
     // truncate input key and use for first round
-    Buffer #(roundKey_t) firstRound (clock, reset, key, roundKeys[0]);
+    Buffer #(roundKey_t) firstRound (clock, reset, key[0:AES_STATE_SIZE-1], roundKeys[0]);
 
     // all other rounds require processing
     genvar i;

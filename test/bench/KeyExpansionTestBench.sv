@@ -69,8 +69,10 @@ begin
   curTest = tester.GetNextTest();
   key = curTest.key; // stabalize key at input, let it trickle down to the rounds
   repeat(NUM_ROUNDS+1) @(negedge clock);
+  $display("*** AES-%0d Round Key %0d: %h", KEY_SIZE, idx, roundKeys[idx]);
   idx += 1;
   tester.Compare(roundKeys[idx], curTest);
+  $display("*** AES-%0d Round Key %0d: %h", KEY_SIZE, idx, roundKeys[idx]);
   
   while(tester.NumTests() != 0)
   begin
@@ -79,6 +81,7 @@ begin
     repeat(1) @(negedge clock);
     idx += 1;
     tester.Compare(roundKeys[idx], curTest);
+    $display("*** AES-%0d Round Key %0d: %h", KEY_SIZE, idx, roundKeys[idx]);
   end
 
   if (KEY_SIZE == 256)
