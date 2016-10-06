@@ -11,10 +11,13 @@ module KeyExpansion #(parameter KEY_SIZE = 128,
 
 (input logic clock, reset, key_t key, output roundKey_t [0:NUM_ROUNDS] roundKeys);
 
-    key_t subKey[NUM_ROUNDS+1];
+    key_t subKey[NUM_ROUNDS];
 
     // truncate input key and use for first round
-    Buffer #(roundKey_t) firstRound (clock, reset, key[0:AES_STATE_SIZE-1], roundKeys[0]);
+    // No buffering
+    assign subKey[0] = key;
+    assign roundKeys[0] = key[0:AES_STATE_SIZE-1];
+    //Buffer #(roundKey_t) firstRound (clock, reset, key[0:AES_STATE_SIZE-1], roundKeys[0]);
 
     // all other rounds require processing
     genvar i;
@@ -23,7 +26,6 @@ module KeyExpansion #(parameter KEY_SIZE = 128,
       KeyRound #(.KEY_SIZE(KEY_SIZE), .ROUND(i)) KeyRound(clock, reset, subKey[i-1], subKey[i], roundKeys[i]);
     end
 
-    assign subKey[0] = key;
 
 endmodule
 

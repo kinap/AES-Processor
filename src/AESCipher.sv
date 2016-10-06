@@ -21,13 +21,9 @@ parameter NUM_ROUNDS =
       : 10;
 
 typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
-
-state_t roundOutput[0:NUM_ROUNDS];
 roundKeys_t roundKeys;
 
-//
-// Module instantiations
-// 
+state_t roundOutput[0:NUM_ROUNDS];
 
 // counter for valid signal
 Counter #(NUM_ROUNDS) validCounter(clock, reset, encodeValid);
