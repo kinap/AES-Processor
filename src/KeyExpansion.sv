@@ -9,14 +9,14 @@ module KeyExpansion #(parameter KEY_SIZE = 128,
                       parameter NUM_ROUNDS = (KEY_SIZE == 256) ? 14 : (KEY_SIZE == 192) ? 12 : 10,
                       parameter type key_t = byte_t [0:KEY_BYTES-1])
 
-(input logic clock, reset, key_t key, output roundKey_t [0:NUM_ROUNDS] roundKeys);
+(input logic clock, reset, key_t key, output roundKey_t [NUM_ROUNDS+1] roundKeys);
 
-    key_t subKey[NUM_ROUNDS];
+    key_t subKey[NUM_ROUNDS+1];
 
     // truncate input key and use for first round
-    // No buffering
     assign subKey[0] = key;
     assign roundKeys[0] = key[0:AES_STATE_SIZE-1];
+    // No buffering first round
     //Buffer #(roundKey_t) firstRound (clock, reset, key[0:AES_STATE_SIZE-1], roundKeys[0]);
 
     // all other rounds require processing
@@ -70,7 +70,7 @@ module KeyRound #(parameter KEY_SIZE = 128,
             else
             begin
                 tmp = in[0 +: 16];
-                tmpSubKey = in; // every 3 rounds, rest since we're about to exceed our history buffer of 1*KEY_SIZE
+                tmpSubKey = in; // every 3 rounds, insert bubble since we're about to exceed our history buffer of 1*KEY_SIZE
             end
         end
         else if (KEY_SIZE == 256)
@@ -82,7 +82,7 @@ module KeyRound #(parameter KEY_SIZE = 128,
             if (keySelect)
             begin
                 tmp = in[KEY_BYTES-16 +: 16];
-                tmpSubKey = in; // every 2 rounds, rest since we're about to exceed our history buffer of 1*KEY_SIZE
+                tmpSubKey = in; // every 2 rounds, insert bubble since we're about to exceed our history buffer of 1*KEY_SIZE
             end
             else
                 tmp = out[0 +: 16];

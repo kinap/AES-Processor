@@ -6,8 +6,8 @@ import AESTestDefinitions::*;
 
 module KeyExpansionTestBench;
 
-    //KeyExp_keysize #(.KEY_SIZE(128)) key_exp_128();   
-    //KeyExp_keysize #(.KEY_SIZE(192)) key_exp_192();   
+    KeyExp_keysize #(.KEY_SIZE(128)) key_exp_128();   
+    KeyExp_keysize #(.KEY_SIZE(192)) key_exp_192();   
     KeyExp_keysize #(.KEY_SIZE(256)) key_exp_256();   
 
 endmodule
@@ -34,7 +34,7 @@ typedef struct packed {
 keyRoundTest_t curTest;
 
 key_t key;
-roundKey_t [0:NUM_ROUNDS] roundKeys;
+roundKey_t [NUM_ROUNDS+1] roundKeys;
 
 logic clock, reset;
 int idx = 0;
@@ -58,7 +58,13 @@ end
 
 initial
 begin
-  $monitor("%t - %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h ", $time, roundKeys[0],roundKeys[1],roundKeys[2],roundKeys[3],roundKeys[4],roundKeys[5],roundKeys[6],roundKeys[7],roundKeys[8],roundKeys[9],roundKeys[10],roundKeys[11],roundKeys[12],roundKeys[13],roundKeys[14]);
+$monitor("%t - \
+| 0: %h | 1: %h | 2: %h | 3: %h \
+| 4: %h | 5: %h | 6: %h | 7: %h \
+| 8: %h | 9: %h | 10: %h | 11: %h \
+| 12: %h | 13: %h | 14: %h ", 
+$time, roundKeys[0],roundKeys[1],roundKeys[2],roundKeys[3],roundKeys[4],roundKeys[5],roundKeys[6],roundKeys[7],roundKeys[8],roundKeys[9],roundKeys[10],roundKeys[11],roundKeys[12],roundKeys[13],roundKeys[14]);
+  //$monitor("%t - 0: %h | 1: %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h | %h ", $time, key_exp.subKey[0],key_exp.subKey[1],key_exp.subKey[2],key_exp.subKey[3],key_exp.subKey[4],key_exp.subKey[5],key_exp.subKey[6],key_exp.subKey[7],key_exp.subKey[8],key_exp.subKey[9],key_exp.subKey[10],key_exp.subKey[11],key_exp.subKey[12],key_exp.subKey[13],key_exp.subKey[14]);
 end
 
 // test entry
@@ -75,7 +81,8 @@ begin
   key = curTest.key; // stabalize key at input, let it trickle down to the rounds
   repeat(NUM_ROUNDS+1) @(negedge clock);
   idx += 1;
-  //tester.Compare(roundKeys[idx], curTest);
+  tester.Compare(roundKeys[idx], curTest);
+  $display("Done priming...");
   
   while(tester.NumTests() != 0)
   begin
@@ -83,7 +90,7 @@ begin
     key = curTest.key; // stabalize key at input, let it trickle down to the rounds
     repeat(1) @(negedge clock);
     idx += 1;
-    //tester.Compare(roundKeys[idx], curTest);
+    tester.Compare(roundKeys[idx], curTest);
   end
 
   if (KEY_SIZE == 256)
