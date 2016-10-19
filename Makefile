@@ -91,6 +91,9 @@ sim_bufferedround:
 sim_keyexpansion:
 	$(SIMULATE_CMD) KeyExpansionTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
 
+sim_top:
+	$(SIMULATE_CMD) AESCipherTestBench $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)
+
 sim_encoderdecoder:
 ifneq ($(MODE),standard)
 	$(SIMULATE_CMD) EncoderDecoderTestBench Transactor $(SIMULATE_MANAGER) $(SIMULATE_FLAGS)

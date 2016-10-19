@@ -47,6 +47,7 @@ assign out = roundOutput[NUM_ROUNDS];
 
 endmodule : AESEncoder
 
+//*******************************************************************************
 
 module AESDecoder #(parameter KEY_SIZE = 128, 
                     parameter KEY_BYTES = KEY_SIZE / 8, 
