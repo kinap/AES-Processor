@@ -24,15 +24,17 @@ typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
 roundKeys_t roundKeys;
 
 state_t roundOutput[0:NUM_ROUNDS];
+state_t temp;
 
 // counter for valid signal
-Counter #(NUM_ROUNDS) validCounter(clock, reset, encodeValid);
+Counter #(NUM_ROUNDS+1) validCounter(clock, reset, encodeValid);
 
 // Key expansion block - internally pipelined
 KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
 
 // First round - add original key only
-AddRoundKey firstRound(in, roundKeys[0], roundOutput[0]);
+AddRoundKey firstRound(in, roundKeys[0], temp);
+Buffer #(state_t) Buffer0(clock, reset, temp, roundOutput[0]);
 
 // Intermediate rounds - sub, shift, mix, add key
 genvar i;
@@ -66,22 +68,24 @@ parameter NUM_ROUNDS =
       : 10;
 
 typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
+roundKeys_t roundKeys;
 
 state_t roundOutput[0:NUM_ROUNDS];
-roundKeys_t roundKeys;
+state_t temp;
 
 //
 // Module instantiations
 // 
 
 // counter for valid signal
-Counter #(NUM_ROUNDS) validCounter(clock, reset, decodeValid);
+Counter #(NUM_ROUNDS+1) validCounter(clock, reset, decodeValid);
 
 // Key expansion block - internally pipelined
 KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKeys[0], roundOutput[0]);
+AddRoundKey firstRound(in, roundKeys[0], temp);
+Buffer #(state_t) Buffer0(clk, reset, temp, roundOutput[0]);
 
 //
 // Round generation loop

@@ -19,7 +19,7 @@ endmodule
 // 
 // TB for 1 keysize at a time
 //
-module AESTop_keysize #(parameter KEY_SIZE = 12,
+module AESTop_keysize #(parameter KEY_SIZE = 128,
                         parameter KEY_BYTES = KEY_SIZE / 8,
                         parameter type key_t = byte_t [0:KEY_BYTES-1]);
 
@@ -53,7 +53,7 @@ end
 
 initial
 begin
-$monitor("\
+$monitor("%t
 Keys --v
 | 0: %h | 1: %h | 2: %h | 3: %h \
 | 4: %h | 5: %h | 6: %h | 7: %h \
@@ -65,7 +65,7 @@ Rounds --v
 | 8: %h | 9: %h | 10: %h | 11: %h \
 | 12: %h | 13: %h | 14: %h \
 %d
-",
+", $time,
 dut.keyExpBlock.roundKeys[0],dut.keyExpBlock.roundKeys[1],dut.keyExpBlock.roundKeys[2],dut.keyExpBlock.roundKeys[3],
 dut.keyExpBlock.roundKeys[4],dut.keyExpBlock.roundKeys[5],dut.keyExpBlock.roundKeys[6],dut.keyExpBlock.roundKeys[7],
 dut.keyExpBlock.roundKeys[8],dut.keyExpBlock.roundKeys[9],dut.keyExpBlock.roundKeys[10],dut.keyExpBlock.roundKeys[11],
@@ -97,9 +97,14 @@ begin
 
   while(!valid)
   begin
-    in = 128'h00112233445566778899aabbccddeeff;
+    in =  128'h00112233445566778899aabbccddeeff;
     key = 128'h000102030405060708090a0b0c0d0e0f;
     repeat(1) @(negedge clock);
+    in =  128'h39d6e9ae76a9b2f3fc462680f766720e;
+    key = 128'h75d11b0e3a68c4223d88dbf017977dd7;
+    repeat(1) @(negedge clock);
+    in = 'x;
+    key = 'x;
   end
 
   repeat(10) @(negedge clock);
