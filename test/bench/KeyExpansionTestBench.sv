@@ -39,7 +39,7 @@ roundKey_t [NUM_ROUNDS+1] roundKeys;
 logic clock, reset;
 int idx = 0;
 
-KeyExpansion #(KEY_SIZE) key_exp(clock, reset, key, roundKeys);
+KeyExpansionPipelined #(KEY_SIZE) key_exp(clock, reset, key, roundKeys);
 
 // Create a free running clock
 initial

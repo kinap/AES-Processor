@@ -53,13 +53,13 @@ end
 
 initial
 begin
-$monitor("%t
-Keys --v
+$monitor("%t 
+Keys --v 
 | 0: %h | 1: %h | 2: %h | 3: %h \
 | 4: %h | 5: %h | 6: %h | 7: %h \
 | 8: %h | 9: %h | 10: %h | 11: %h \
 | 12: %h | 13: %h | 14: %h
-Rounds --v
+Rounds --v 
 | 0: %h | 1: %h | 2: %h | 3: %h \
 | 4: %h | 5: %h | 6: %h | 7: %h \
 | 8: %h | 9: %h | 10: %h | 11: %h \

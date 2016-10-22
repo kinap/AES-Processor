@@ -30,7 +30,7 @@ state_t temp;
 Counter #(NUM_ROUNDS+1) validCounter(clock, reset, encodeValid);
 
 // Key expansion block - internally pipelined
-KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
+KeyExpansionPipelined #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
 
 // First round - add original key only
 AddRoundKey firstRound(in, roundKeys[0], temp);
@@ -68,9 +68,9 @@ parameter NUM_ROUNDS =
       : 10;
 
 typedef roundKey_t [0:NUM_ROUNDS] roundKeys_t;
-roundKeys_t roundKeys;
 
-state_t roundOutput[0:NUM_ROUNDS];
+state_t roundOutput[NUM_ROUNDS+1];
+roundKeys_t roundKeyOutput[NUM_ROUNDS+1];
 state_t temp;
 
 //
@@ -80,12 +80,14 @@ state_t temp;
 // counter for valid signal
 Counter #(NUM_ROUNDS+1) validCounter(clock, reset, decodeValid);
 
-// Key expansion block - internally pipelined
-KeyExpansion #(KEY_SIZE) keyExpBlock (clock, reset, key, roundKeys);
+// Key expansion block - calculating all keys at once here because the inverse
+// cipher uses keys in the reverse order. Since each key depends on the
+// previous, we must calculate all in the first round.
+KeyExpansionSingleCycle #(KEY_SIZE, NUM_ROUNDS, KEY_BYTES, roundKeys_t, key_t) keyExpBlock (key, roundKeyOutput[0]);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKeys[0], temp);
-Buffer #(state_t) Buffer0(clk, reset, temp, roundOutput[0]);
+AddRoundKey firstRound(in, roundKeyOutput[0][NUM_ROUNDS], temp);
+Buffer #(state_t) Buffer0 (clock, reset, temp, roundOutput[0]);
 
 //
 // Round generation loop
@@ -96,7 +98,8 @@ genvar i;
 generate
   for(i = 1; i <= NUM_ROUNDS; i++)
     begin
-      BufferedRoundInverse #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeys[i], roundOutput[i]);
+      BufferedRoundInverse #(i, NUM_ROUNDS) Round(clock, reset, roundOutput[i-1], roundKeyOutput[i-1][NUM_ROUNDS-i], roundOutput[i]);
+      Buffer #(roundKeys_t) KeyBuffer(clock, reset, roundKeyOutput[i-1], roundKeyOutput[i]);
     end
 endgenerate
 

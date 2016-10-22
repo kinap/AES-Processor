@@ -4,10 +4,10 @@ import AESDefinitions::*;
 //
 // Pipelined key expansion module. Provides a new key when a round needs it.
 //
-module KeyExpansion #(parameter KEY_SIZE = 128,
-                      parameter KEY_BYTES = KEY_SIZE / 8,
-                      parameter NUM_ROUNDS = (KEY_SIZE == 256) ? 14 : (KEY_SIZE == 192) ? 12 : 10,
-                      parameter type key_t = byte_t [0:KEY_BYTES-1])
+module KeyExpansionPipelined #(parameter KEY_SIZE = 128,
+                               parameter KEY_BYTES = KEY_SIZE / 8,
+                               parameter NUM_ROUNDS = (KEY_SIZE == 256) ? 14 : (KEY_SIZE == 192) ? 12 : 10,
+                               parameter type key_t = byte_t [0:KEY_BYTES-1])
 
 (input logic clock, reset, key_t key, output roundKey_t [0:NUM_ROUNDS] roundKeys);
 
@@ -16,7 +16,6 @@ module KeyExpansion #(parameter KEY_SIZE = 128,
     // truncate input key and use for first round
     assign subKey[0] = key;
     assign roundKeys[0] = key[0:AES_STATE_SIZE-1];
-    //Buffer #(roundKey_t) firstRound (clock, reset, key[0:AES_STATE_SIZE-1], roundKeys[0]);
 
     // all other rounds require processing
     genvar i;
