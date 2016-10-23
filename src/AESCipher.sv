@@ -78,7 +78,7 @@ state_t temp;
 // 
 
 // counter for valid signal
-Counter #(NUM_ROUNDS+1) validCounter(clock, reset, decodeValid);
+Counter #(NUM_ROUNDS) validCounter(clock, reset, decodeValid);
 
 // Key expansion block - calculating all keys at once here because the inverse
 // cipher uses keys in the reverse order. Since each key depends on the
@@ -86,8 +86,8 @@ Counter #(NUM_ROUNDS+1) validCounter(clock, reset, decodeValid);
 KeyExpansionSingleCycle #(KEY_SIZE, NUM_ROUNDS, KEY_BYTES, roundKeys_t, key_t) keyExpBlock (key, roundKeyOutput[0]);
 
 // First round - add key only
-AddRoundKey firstRound(in, roundKeyOutput[0][NUM_ROUNDS], temp);
-Buffer #(state_t) Buffer0 (clock, reset, temp, roundOutput[0]);
+AddRoundKey firstRound(in, roundKeyOutput[0][NUM_ROUNDS], roundOutput[0]);
+//Buffer #(state_t) Buffer0 (clock, reset, temp, roundOutput[0]);
 
 //
 // Round generation loop

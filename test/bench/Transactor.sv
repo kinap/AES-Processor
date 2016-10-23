@@ -228,7 +228,7 @@ encode_128: assert property(encodeCheck_128);
 property decodeCheck_128;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
-  (decodeValid_128 & (outputPlain_128 == $past(plainData, NUM_ROUNDS_128+1))) | !decodeValid_128;
+  (decodeValid_128 & (outputPlain_128 == $past(plainData, NUM_ROUNDS_128))) | !decodeValid_128;
 endproperty
 
 decode_128: assert property(decodeCheck_128);
@@ -237,10 +237,10 @@ decode_128: assert property(decodeCheck_128);
 property encodeDecodeCheck_128;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (decodeValid_128 & (outputPlain_128 == $past(plainData, 2*(NUM_ROUNDS_128+1)))) | !decodeValid_128;
+  (decodeValid_128 & (outputPlain_128 == $past(plainData, 2*NUM_ROUNDS_128+1))) | !decodeValid_128;
 endproperty
 
-encodeDecode_128: assert property(encodeDecodeCheck_128);
+encodeDecode_128: assert property(encodeDecodeCheck_128) else $error("plain: %h past plain: %h valid: %b", outputPlain_128, $past(plainData, 2*NUM_ROUNDS_128), decodeValid_128);
 
 property encoderDecoderPlain_128;
   @(posedge clock)
@@ -253,16 +253,16 @@ encodeDecodeDiffPlain_128: assert property(encoderDecoderPlain_128);
 property encoderDecoderEncrypted_128;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain_128 != $past(outputEncrypt_128, NUM_ROUNDS_128+1)) | !decodeValid_128;
+  (outputPlain_128 != $past(outputEncrypt_128, NUM_ROUNDS_128)) | !decodeValid_128;
 endproperty
 
-encodeDecodeEiffEncrypted_128: assert property(encoderDecoderEncrypted_128);
+encodeDecodeDiffEncrypted_128: assert property(encoderDecoderEncrypted_128);
 
 // Decoder -> Encoder Assertions
 property decodeEncodeCheck_128;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (encodeValid2_128 & (outputEncrypt2_128 == $past(encryptData_128, 2*(NUM_ROUNDS_128+1)))) | !encodeValid2_128;
+  (encodeValid2_128 & (outputEncrypt2_128 == $past(encryptData_128, 2*NUM_ROUNDS_128+1))) | !encodeValid2_128;
 endproperty
 
 decodeEncode_128: assert property(decodeEncodeCheck_128);
@@ -278,7 +278,7 @@ decodeEncodeDiffPlain_128: assert property(decoderEncoderPlain_128);
 property decoderEncoderEncrypted_128;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain2_128 != $past(encryptData_128, NUM_ROUNDS_128+1)) | !decodeValid2_128;
+  (outputPlain2_128 != $past(encryptData_128, NUM_ROUNDS_128)) | !decodeValid2_128;
 endproperty
 
 decodeEncodeDiffEncrypted_128: assert property(decoderEncoderEncrypted_128);
@@ -298,7 +298,7 @@ encode_192: assert property(encodeCheck_192);
 property decodeCheck_192;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
-  (decodeValid_192 & (outputPlain_192 == $past(plainData, NUM_ROUNDS_192+1))) | !decodeValid_192;
+  (decodeValid_192 & (outputPlain_192 == $past(plainData, NUM_ROUNDS_192))) | !decodeValid_192;
 endproperty
 
 decode_192: assert property(decodeCheck_192);
@@ -307,7 +307,7 @@ decode_192: assert property(decodeCheck_192);
 property encodeDecodeCheck_192;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (decodeValid_192 & (outputPlain_192 == $past(plainData, 2*(NUM_ROUNDS_192+1)))) | !decodeValid_192;
+  (decodeValid_192 & (outputPlain_192 == $past(plainData, 2*NUM_ROUNDS_192+1))) | !decodeValid_192;
 endproperty
 
 decodeEncode_192: assert property(encodeDecodeCheck_192);
@@ -323,7 +323,7 @@ encodeDecodeDiffPlain_192: assert property(encoderDecoderPlain_192);
 property encoderDecoderEncrypted_192;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain_192 != $past(outputEncrypt_192, NUM_ROUNDS_192+1)) | !decodeValid_192;
+  (outputPlain_192 != $past(outputEncrypt_192, NUM_ROUNDS_192)) | !decodeValid_192;
 endproperty
 
 encodeDecodeEiffEncrypted_192: assert property(encoderDecoderEncrypted_192);
@@ -332,7 +332,7 @@ encodeDecodeEiffEncrypted_192: assert property(encoderDecoderEncrypted_192);
 property decodeEncodeCheck_192;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (encodeValid2_192 & (outputEncrypt2_192 == $past(encryptData_192, 2*(NUM_ROUNDS_192+1)))) | !encodeValid2_192;
+  (encodeValid2_192 & (outputEncrypt2_192 == $past(encryptData_192, 2*NUM_ROUNDS_192+1))) | !encodeValid2_192;
 endproperty
 
 decodeEndoce_192: assert property(decodeEncodeCheck_192);
@@ -348,7 +348,7 @@ decodeEncodeDiffPlain_192: assert property(decoderEncoderPlain_192);
 property decoderEncoderEncrypted_192;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain2_192 != $past(encryptData_192, NUM_ROUNDS_192+1)) | !decodeValid2_192;
+  (outputPlain2_192 != $past(encryptData_192, NUM_ROUNDS_192)) | !decodeValid2_192;
 endproperty
 
 decodeEncodeDiffEncrypted_192: assert property(decoderEncoderEncrypted_192);
@@ -369,7 +369,7 @@ encode_256: assert property(encodeCheck_256);
 property decodeCheck_256;
   @(posedge clock)
   disable iff(reset || (testPhase != 0))
-  (decodeValid_256 & (outputPlain_256 == $past(plainData, NUM_ROUNDS_256+1))) | !decodeValid_256;
+  (decodeValid_256 & (outputPlain_256 == $past(plainData, NUM_ROUNDS_256))) | !decodeValid_256;
 endproperty
 
 decode_256: assert property(decodeCheck_256);
@@ -378,7 +378,7 @@ decode_256: assert property(decodeCheck_256);
 property encodeDecodeCheck_256;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (decodeValid_256 & (outputPlain_256 == $past(plainData, 2*(NUM_ROUNDS_256+1)))) | !decodeValid_256;
+  (decodeValid_256 & (outputPlain_256 == $past(plainData, 2*NUM_ROUNDS_256+1))) | !decodeValid_256;
 endproperty
 
 decodeEncode_256: assert property(encodeDecodeCheck_256);
@@ -394,7 +394,7 @@ encodeDecodeDiffPlain_256: assert property(encoderDecoderPlain_256);
 property encoderDecoderEncrypted_256;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain_256 != $past(outputEncrypt_256, NUM_ROUNDS_256+1)) | !decodeValid_256;
+  (outputPlain_256 != $past(outputEncrypt_256, NUM_ROUNDS_256)) | !decodeValid_256;
 endproperty
 
 encodeDecodeEiffEncrypted_256: assert property(encoderDecoderEncrypted_256);
@@ -403,7 +403,7 @@ encodeDecodeEiffEncrypted_256: assert property(encoderDecoderEncrypted_256);
 property decodeEncodeCheck_256;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (encodeValid2_256 & (outputEncrypt2_256 == $past(encryptData_256, 2*(NUM_ROUNDS_256+1)))) | !encodeValid2_256;
+  (encodeValid2_256 & (outputEncrypt2_256 == $past(encryptData_256, 2*NUM_ROUNDS_256+1))) | !encodeValid2_256;
 endproperty
 
 decodeEndoce_256: assert property(decodeEncodeCheck_256);
@@ -419,7 +419,7 @@ decodeEncodeDiffPlain_256: assert property(decoderEncoderPlain_256);
 property decoderEncoderEncrypted_256;
   @(posedge clock)
   disable iff(reset || testPhase != 1 || phaseReset)
-  (outputPlain2_256 != $past(encryptData_256, NUM_ROUNDS_256+1)) | !decodeValid2_256;
+  (outputPlain2_256 != $past(encryptData_256, NUM_ROUNDS_256)) | !decodeValid2_256;
 endproperty
 
 decodeEncodeDiffEncrypted_256: assert property(decoderEncoderEncrypted_256);
