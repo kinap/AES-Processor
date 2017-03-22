@@ -39,7 +39,7 @@ All of the recipes in the provided Makefile assume the user is on a Linux system
 **MODE**  
 Specifies the simulation mode. Valid modes are:
 
-| Mode     ||
+| Mode     | Description |
 |----------|---
 | standard | No Veloce support or dependencies. Cannot run top-level testbench, only sub-module testbenches.
 | puresim  | Veloce simulation 
@@ -50,7 +50,7 @@ If simulating for any mode besides puresim, this option must be specified for bo
 **INFER_RAM**  
 Specifies whether to infer RAMs for the SBox (KeyExpansion and Subbytes) and GF LUTs (MixColumns).
 
-| Infer RAMs ||
+| Infer RAMs | Description |
 |------------|---
 | y          | Yes, infer RAMs for the SBox and GFLUT memories.
 | n          | No, do not infer RAMs for the SBox and GFLUT memories.
